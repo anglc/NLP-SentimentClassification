@@ -1,0 +1,47 @@
+package model;
+
+public class nGram implements Comparable<Object> {
+	public String[] sWord;
+	public int[] iWord;
+	public double score;
+
+	public nGram() {
+
+	}
+
+	public nGram(int[] i) {
+		set(i);
+	}
+
+	public nGram(String[] s) {
+		set(s);
+	}
+
+	public void set(int[] i) {
+		iWord = i;
+	}
+
+	public void set(String[] s) {
+		sWord = s;
+	}
+
+	@Override
+	public int compareTo(Object other) throws ClassCastException {
+		nGram obj = (nGram) other;
+		if (iWord != null && obj.iWord != null) {
+			for (int i = 0; i < iWord.length; i++) {
+				if (iWord[i] != obj.iWord[i])
+					return iWord[i] < obj.iWord[i] ? 1 : -1;
+			}
+			return 0;
+		}
+		if (sWord != null && obj.sWord != null) {
+			for (int i = 0; i < sWord.length; i++) {
+				if (!sWord[i].equals(obj.sWord[i]))
+					return sWord[i].compareTo(obj.sWord[i]);
+			}
+			return 0;
+		}
+		return 0;
+	}
+}
