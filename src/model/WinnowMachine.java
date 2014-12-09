@@ -34,24 +34,22 @@ public class WinnowMachine {
 	 */
 	public void add(double x[], int c) {
 		assert (x.length == f.length);
-		for (int it = 0; it < 50; it++) {
-			double hx = hFunction(x);
-			if (c == 1) {
-				if (hx < threshold) {
-					for (int i = 0; i < x.length; i++)
-						if (x[i] > 0)
-							f[i] = f[i] * 2;
-				} else {
-					return;
-				}
+		double hx = hFunction(x);
+		if (c == 1) {
+			if (hx < threshold) {
+				for (int i = 0; i < x.length; i++)
+					if (x[i] > 0)
+						f[i] = f[i] * 2;
 			} else {
-				if (hx > threshold) {
-					for (int i = 0; i < x.length; i++)
-						if (x[i] > 0)
-							f[i] = f[i] / 2;
-				} else {
-					return;
-				}
+				return;
+			}
+		} else {
+			if (hx > threshold) {
+				for (int i = 0; i < x.length; i++)
+					if (x[i] > 0)
+						f[i] = f[i] / 2;
+			} else {
+				return;
 			}
 		}
 	}
