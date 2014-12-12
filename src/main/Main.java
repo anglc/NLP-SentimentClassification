@@ -2,6 +2,7 @@ package main;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.TreeSet;
 
 import model.DataSieve;
@@ -13,27 +14,31 @@ import model.nGram;
 public class Main {
 	public static void main(String[] args) {
 		Loader loader = new Loader("training_set");
-		// Loader loader = new Loader("testcase");
+//		 Loader loader = new Loader("testcase");
 		String[] posViews = (String[]) loader.posViews.toArray(new String[0]);
 		String[] negViews = (String[]) loader.negViews.toArray(new String[0]);
-
-		int Ngram = 3;
+		String[] posTrain = Arrays.copyOfRange(posViews, 0, posViews.length / 2);
+		String[] negTrain = Arrays.copyOfRange(negViews, 0, negViews.length / 2);
+		String[] posTest = Arrays.copyOfRange(posViews, posViews.length / 2, posViews.length);
+		String[] negTest = Arrays.copyOfRange(negViews, negViews.length / 2, negViews.length);
+		int Ngram = 5;
 		System.out.printf("positive sieve %d-grams building ...\n", Ngram);
-		DataSieve posSieve = new DataSieve(Ngram, posViews, negViews);
+		DataSieve posSieve = new DataSieve(Ngram, posTrain, negTrain);
+
+//		 posSieve.printBestNgram(1000);
+//		 System.exit(0);
 		System.out.printf("negative sieve %d-grams building ...\n", Ngram);
-		DataSieve negSieve = new DataSieve(Ngram, negViews, posViews);
-
-		// posSieve.printBestNgram(10);
-
-		int topNgram = 1000;
+		DataSieve negSieve = new DataSieve(Ngram, negTrain, posTrain);
+		System.out.printf("positive #ngram = %d\n", posSieve.ngramCount);
+		int topNgram = 10000;
 		ArrayList<nGram> posPick = posSieve.getBestNgram(topNgram);
 		ArrayList<nGram> negPick = negSieve.getBestNgram(topNgram);
 		ArrayList<nGram> mixPick = mergePick(posPick, negPick, topNgram);
 
 		topNgram = mixPick.size();
 
-		testWinnow(Ngram, topNgram, mixPick, posViews, negViews);
-		testPassiveAggressive(Ngram, topNgram, mixPick, posViews, negViews);
+		testWinnow(Ngram, topNgram, mixPick, posTest, negTest);
+		testPassiveAggressive(Ngram, topNgram, mixPick, posTest, negTest);
 
 	}
 
@@ -46,7 +51,7 @@ public class Main {
 				ret.add(a.get(i));
 				i++;
 			} else {
-				ret.add(a.get(j));
+				ret.add(b.get(j));
 				j++;
 			}
 		}
@@ -67,7 +72,7 @@ public class Main {
 			ArrayList<nGram> mixPick, String[] posViews, String[] negViews) {
 		System.out.printf("Winnow algorithm top-%d prepare ...\n", topNgram);
 		WinnowMachine MLmachine = new WinnowMachine(topNgram);
-		int ac = 0, wa = 0, ITLIMIT = 20;
+		int ac = 0, wa = 0, ITLIMIT = 40;
 		ArrayList<double[]> posVec = new ArrayList<double[]>();
 		ArrayList<double[]> negVec = new ArrayList<double[]>();
 		for (int i = 0; i < posViews.length; i++) {
@@ -116,7 +121,7 @@ public class Main {
 		System.out.printf("Passive-Aggressive algorithm top-%d prepare ...\n",
 				topNgram);
 		PassiveAggressive PAmachine = new PassiveAggressive(topNgram);
-		int ac = 0, wa = 0, ITLIMIT = 20;
+		int ac = 0, wa = 0, ITLIMIT = 40;
 		ArrayList<double[]> posVec = new ArrayList<double[]>();
 		ArrayList<double[]> negVec = new ArrayList<double[]>();
 		for (int i = 0; i < posViews.length; i++) {

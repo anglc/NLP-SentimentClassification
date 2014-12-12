@@ -14,7 +14,7 @@ public class DataSieve {
 	private TreeMap<nGram, Integer> viewsMap, otherMap; // total appear count
 	private TreeMap<nGram, Integer> viewsCount, otherCount; // #appear in views
 	private ArrayList<nGram> xsquare;
-
+	public int ngramCount = 0;
 	/**
 	 * 
 	 * @param n
@@ -118,7 +118,7 @@ public class DataSieve {
 			ArrayList<nGram> t = ModelUtilities.transformNgram(otherViews[i], n);
 			storeNgram(t, -1);
 		}
-
+		ngramCount = viewsMap.size();
 		xsquare = new ArrayList<nGram>();
 		for (Map.Entry<nGram, Integer> entry : viewsMap.entrySet()) {
 			double A, B, C, D;

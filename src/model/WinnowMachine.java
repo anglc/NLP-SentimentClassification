@@ -7,7 +7,7 @@ public class WinnowMachine {
 
 	public WinnowMachine(int V) {
 		this.V = V;
-		threshold = V / 512.0;
+		threshold = V / 2;
 		init();
 	}
 
