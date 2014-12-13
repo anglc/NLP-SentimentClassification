@@ -4,13 +4,13 @@
 
 ## To do ##
 
-* `Language Modeling` build
-* Optimal Winnow algorithm and Passive-Aggressive Algorithm
+* add more features
 
 ## Complete ##
 
 * Simple Passive-Aggressive Algorithm
 * Simple Winnow algorithm
+* Simple Language Modeling
 * Passive-Aggressive Algorithm & Winnow algorithm adjust training
 
 ## Usage ##
@@ -21,10 +21,30 @@
 ## Sample Output ##
 
 ```
-positive sieve 5-grams building ...
-negative sieve 5-grams building ...
-positive #ngram = 234413
-negative #ngram = 217863
+positive sieve 3-grams building ...
+negative sieve 3-grams building ...
+positive #ngram = 208029
+negative #ngram = 193143
+Language Model top-10000 prepare ...
+Language Model top-10000 testing ...
+Table `Language Model Class Positive`
+|Truth\Classifier|  Classifier no| Classifier yes|
+|          ------|         ------|         ------|
+|        Truth no|            254|            146|
+|       Truth yes|             47|            353|
+
+Table `Language Model Class Negative`
+|Truth\Classifier|  Classifier no| Classifier yes|
+|          ------|         ------|         ------|
+|        Truth no|            353|             47|
+|       Truth yes|            146|            254|
+
+Table `Language Model Final`
+|Truth\Classifier|  Classifier no| Classifier yes|
+|          ------|         ------|         ------|
+|        Truth no|            607|            193|
+|       Truth yes|            193|            607|
+
 Winnow algorithm top-10000 prepare ...
 complete |                                        |
          |----------------------------------------|
@@ -32,20 +52,20 @@ Winnow algorithm top-10000 testing ...
 Table `Winnow Class Positive`
 |Truth\Classifier|  Classifier no| Classifier yes|
 |          ------|         ------|         ------|
-|        Truth no|            400|              0|
-|       Truth yes|              0|            400|
+|        Truth no|            264|            136|
+|       Truth yes|            164|            236|
 
 Table `Winnow Class Negative`
 |Truth\Classifier|  Classifier no| Classifier yes|
 |          ------|         ------|         ------|
-|        Truth no|            400|              0|
-|       Truth yes|              0|            400|
+|        Truth no|            236|            164|
+|       Truth yes|            136|            264|
 
 Table `Winnow Final`
 |Truth\Classifier|  Classifier no| Classifier yes|
 |          ------|         ------|         ------|
-|        Truth no|            800|              0|
-|       Truth yes|              0|            800|
+|        Truth no|            500|            300|
+|       Truth yes|            300|            500|
 
 Passive-Aggressive algorithm top-10000 prepare ...
 complete |                                        |
@@ -54,18 +74,18 @@ Passive-Aggressive algorithm top-10000 testing ...
 Table `Passive-Aggressive Class Positive`
 |Truth\Classifier|  Classifier no| Classifier yes|
 |          ------|         ------|         ------|
-|        Truth no|            399|              1|
-|       Truth yes|              0|            400|
+|        Truth no|            269|            131|
+|       Truth yes|            105|            295|
 
 Table `Passive-Aggressive Class Negative`
 |Truth\Classifier|  Classifier no| Classifier yes|
 |          ------|         ------|         ------|
-|        Truth no|            400|              0|
-|       Truth yes|              1|            399|
+|        Truth no|            295|            105|
+|       Truth yes|            131|            269|
 
 Table `Passive-Aggressive Final`
 |Truth\Classifier|  Classifier no| Classifier yes|
 |          ------|         ------|         ------|
-|        Truth no|            799|              1|
-|       Truth yes|              1|            799|
+|        Truth no|            564|            236|
+|       Truth yes|            236|            564|
 ```
