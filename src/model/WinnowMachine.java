@@ -1,6 +1,6 @@
 package model;
 
-public class WinnowMachine {
+public class WinnowMachine implements Classifier {
 	public double[] f;
 	public double threshold;
 	public int V;
@@ -59,6 +59,7 @@ public class WinnowMachine {
 	 * @param x
 	 * @return whether in this class.
 	 */
+	@Override
 	public boolean classify(double x[]) {
 		assert (x.length == f.length);
 		double hx = hFunction(x);

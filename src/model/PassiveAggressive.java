@@ -1,6 +1,6 @@
 package model;
 
-public class PassiveAggressive {
+public class PassiveAggressive implements Classifier {
 	public double[] w;
 	public double threshold;
 	public int V;
@@ -47,7 +47,7 @@ public class PassiveAggressive {
 		assert (x.length == w.length);
 		int ybar, y;
 		double l, tau;
-		ybar = classify(x);
+		ybar = classify(x) ? 1 : -1;
 		y = c;
 		if (ybar == y)	return;
 		l = Math.max(0, 1 - y * dot(x));
@@ -65,8 +65,9 @@ public class PassiveAggressive {
 	 * @param x
 	 * @return whether in this class.
 	 */
-	public int classify(double x[]) {
+	@Override
+	public boolean classify(double x[]) {
 		assert (x.length == w.length);
-		return sign(dot(x));
+		return sign(dot(x)) > 0;
 	}
 }

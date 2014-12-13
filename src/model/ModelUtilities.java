@@ -21,24 +21,30 @@ public class ModelUtilities {
 
 	public static ArrayList<nGram> transformNgram(String s, int n) {
 		ArrayList<nGram> ret = new ArrayList<nGram>();
-		ArrayList<String> tokens = new ArrayList<String>();
-		StringTokenizer st = new StringTokenizer(s);
-		while (st.hasMoreTokens())
-			tokens.add(st.nextToken());
-		int[] iTokens = new int[tokens.size()];
-		for (int i = 0; i < tokens.size(); i++)
-			iTokens[i] = rename(tokens.get(i));
-		for (int i = 0; i < tokens.size(); i++) {
-			int[] a = new int[n];
-			for (int j = 0; j < n && i + j < tokens.size(); j++)
-				a[j] = iTokens[i + j];
-			nGram e = new nGram(a);
-			ret.add(e);
+		String[] stmt = s.split("\\.|,|:");
+		for (String ss : stmt) {
+			ArrayList<String> tokens = new ArrayList<String>();
+			StringTokenizer st = new StringTokenizer(ss);
+			while (st.hasMoreTokens())
+				tokens.add(st.nextToken());
+			int[] iTokens = new int[tokens.size()];
+			for (int i = 0; i < tokens.size(); i++)
+				iTokens[i] = rename(tokens.get(i));
+			for (int i = 0; i < tokens.size(); i++) {
+				int[] a = new int[n];
+				for (int j = 0; j < n; j++)
+					a[j] = -1;
+				for (int j = 0; j < n && i + j < tokens.size(); j++)
+					a[j] = iTokens[i + j];
+				nGram e = new nGram(a);
+				ret.add(e);
+			}
 		}
 		return ret;
 	}
-	
-	public static double[] getCharacteristicVector(String s, int n, ArrayList<nGram> vec) {
+
+	public static double[] getCharacteristicVector(String s, int n,
+			ArrayList<nGram> vec) {
 		ArrayList<nGram> t = transformNgram(s, n);
 		TreeSet<nGram> tSet = new TreeSet<nGram>(t);
 		double[] ret = new double[vec.size()];
@@ -50,7 +56,9 @@ public class ModelUtilities {
 		}
 		return ret;
 	}
-	public static double[] getCharacteristicWeightVector(String s, int n, ArrayList<nGram> vec) {
+
+	public static double[] getCharacteristicWeightVector(String s, int n,
+			ArrayList<nGram> vec) {
 		ArrayList<nGram> t = transformNgram(s, n);
 		TreeMap<nGram, Integer> tMap = new TreeMap<nGram, Integer>();
 		for (int i = 0; i < t.size(); i++) {
@@ -68,9 +76,19 @@ public class ModelUtilities {
 		}
 		return ret;
 	}
+
 	public static String getWordName(int id) {
 		if (invRenameMap.containsKey(id))
 			return invRenameMap.get(id);
 		return "";
+	}
+	
+	public static void printTable(String tableName, int table[][]) {
+		System.out.printf("Table `%s`\n", tableName);
+		System.out.printf("|%16s|%15s|%15s|\n", "Truth\\Classifier", "Classifier no", "Classifier yes");
+		System.out.printf("|%16s|%15s|%15s|\n", "------", "------", "------");
+		System.out.printf("|%16s|%15d|%15d|\n", "Truth no", table[0][0], table[0][1]);
+		System.out.printf("|%16s|%15d|%15d|\n", "Truth yes", table[1][0], table[1][1]);
+		System.out.println();
 	}
 }

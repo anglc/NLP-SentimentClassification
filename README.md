@@ -9,8 +9,9 @@
 
 ## Complete ##
 
-* Simple `Passive-Aggressive Algorithm`
-* Simple `Winnow algorithm`
+* Simple Passive-Aggressive Algorithm
+* Simple Winnow algorithm
+* Passive-Aggressive Algorithm & Winnow algorithm adjust training
 
 ## Usage ##
 
@@ -20,12 +21,51 @@
 ## Sample Output ##
 
 ```
-positive sieve 3-grams building ...
-negative sieve 3-grams building ...
-Winnow algorithm top-1000 prepare ...
-Winnow algorithm top-1000 testing ...
-Winnow result 1245 / 355 (AC/WA)
-Passive-Aggressive algorithm top-1000 prepare ...
-Passive-Aggressive algorithm top-1000 testing ...
-Passive-Aggressive result 1307 / 293 (AC/WA)
+positive sieve 5-grams building ...
+negative sieve 5-grams building ...
+positive #ngram = 234413
+negative #ngram = 217863
+Winnow algorithm top-10000 prepare ...
+complete |                                        |
+         |----------------------------------------|
+Winnow algorithm top-10000 testing ...
+Table `Winnow Class Positive`
+|Truth\Classifier|  Classifier no| Classifier yes|
+|          ------|         ------|         ------|
+|        Truth no|            400|              0|
+|       Truth yes|              0|            400|
+
+Table `Winnow Class Negative`
+|Truth\Classifier|  Classifier no| Classifier yes|
+|          ------|         ------|         ------|
+|        Truth no|            400|              0|
+|       Truth yes|              0|            400|
+
+Table `Winnow Final`
+|Truth\Classifier|  Classifier no| Classifier yes|
+|          ------|         ------|         ------|
+|        Truth no|            800|              0|
+|       Truth yes|              0|            800|
+
+Passive-Aggressive algorithm top-10000 prepare ...
+complete |                                        |
+         |----------------------------------------|
+Passive-Aggressive algorithm top-10000 testing ...
+Table `Passive-Aggressive Class Positive`
+|Truth\Classifier|  Classifier no| Classifier yes|
+|          ------|         ------|         ------|
+|        Truth no|            399|              1|
+|       Truth yes|              0|            400|
+
+Table `Passive-Aggressive Class Negative`
+|Truth\Classifier|  Classifier no| Classifier yes|
+|          ------|         ------|         ------|
+|        Truth no|            400|              0|
+|       Truth yes|              1|            399|
+
+Table `Passive-Aggressive Final`
+|Truth\Classifier|  Classifier no| Classifier yes|
+|          ------|         ------|         ------|
+|        Truth no|            799|              1|
+|       Truth yes|              1|            799|
 ```
