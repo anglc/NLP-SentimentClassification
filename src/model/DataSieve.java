@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -15,6 +14,7 @@ public class DataSieve {
 	private TreeMap<nGram, Integer> viewsCount, otherCount; // #appear in views
 	private ArrayList<nGram> xsquare;
 	public int ngramCount = 0;
+
 	/**
 	 * 
 	 * @param n
@@ -86,7 +86,8 @@ public class DataSieve {
 			nGram e = xsquare.get(i);
 			System.out.printf("Score %f (", e.score);
 			for (int j = 0; j < e.iWord.length; j++) {
-				System.out.printf("%s ", ModelUtilities.getWordName(e.iWord[j]));
+				System.out
+						.printf("%s ", ModelUtilities.getWordName(e.iWord[j]));
 			}
 			System.out.println(")");
 		}
@@ -115,7 +116,8 @@ public class DataSieve {
 			storeNgram(t, 1);
 		}
 		for (int i = 0; i < otherViews.length; i++) {
-			ArrayList<nGram> t = ModelUtilities.transformNgram(otherViews[i], n);
+			ArrayList<nGram> t = ModelUtilities
+					.transformNgram(otherViews[i], n);
 			storeNgram(t, -1);
 		}
 		ngramCount = viewsMap.size();
@@ -139,7 +141,7 @@ public class DataSieve {
 		Collections.sort(xsquare, new Comparator<nGram>() {
 			@Override
 			public int compare(nGram a, nGram b) {
-				if (Math.abs(a.score - b.score) > 1e-8)
+				if (a.score != b.score)
 					return a.score > b.score ? -1 : 1;
 				return 0;
 			}

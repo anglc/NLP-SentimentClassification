@@ -18,11 +18,17 @@ public class ModelUtilities {
 			return renameMap.get(token);
 		}
 	}
-
+	public static String sieveString(String s) {
+		String[] regex = {"\\(", "\\)", "\""};
+		for (String e : regex)
+			s = s.replaceAll(e, "");
+		return s;
+	}
 	public static ArrayList<nGram> transformNgram(String s, int n) {
 		ArrayList<nGram> ret = new ArrayList<nGram>();
 		String[] stmt = s.split("\\.|,|:");
 		for (String ss : stmt) {
+			ss = sieveString(ss);
 			ArrayList<String> tokens = new ArrayList<String>();
 			StringTokenizer st = new StringTokenizer(ss);
 			while (st.hasMoreTokens())

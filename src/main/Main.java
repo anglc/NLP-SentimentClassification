@@ -27,7 +27,7 @@ public class Main {
 				posViews.length * 2 / 4, posViews.length);
 		String[] negTest = Arrays.copyOfRange(negViews,
 				negViews.length * 2 / 4, negViews.length);
-		int Ngram = 3;
+		int Ngram = 1;
 		System.out.printf("positive sieve %d-grams building ...\n", Ngram);
 		DataSieve posSieve = new DataSieve(Ngram, posTrain, negTrain);
 
@@ -46,13 +46,17 @@ public class Main {
 
 		topNgram = mixPick.size();
 
-		testLanguageModel(Ngram, topNgram, mixPick, posTrain, negTrain,
+		LanguageModel LMmachine;
+		WinnowMachine MLmachine;
+		PassiveAggressive PAmachine;
+		LMmachine = testLanguageModel(Ngram, topNgram, mixPick, posTrain,
+				negTrain, posTest, negTest);
+		MLmachine = testWinnow(Ngram, topNgram, mixPick, posTrain, negTrain,
 				posTest, negTest);
-		testWinnow(Ngram, topNgram, mixPick, posTrain, negTrain, posTest,
-				negTest);
-		testPassiveAggressive(Ngram, topNgram, mixPick, posTrain, negTrain,
-				posTest, negTest);
-
+		PAmachine = testPassiveAggressive(Ngram, topNgram, mixPick, posTrain,
+				negTrain, posTest, negTest);
+		testThreeWaysInterview(LMmachine, MLmachine, PAmachine, Ngram,
+				topNgram, mixPick, posTest, negTest);
 	}
 
 	public static ArrayList<nGram> mergePick(ArrayList<nGram> a,
@@ -81,7 +85,108 @@ public class Main {
 		return ret;
 	}
 
-	public static void testLanguageModel(int Ngram, int topNgram,
+	public static void testThreeWaysInterview(LanguageModel LMmachine,
+			WinnowMachine MLmachine, PassiveAggressive PAmachine, int Ngram,
+			int topNgram, ArrayList<nGram> mixPick, String[] posTest,
+			String[] negTest) {
+		System.out.printf("Three-Ways Online top-%d prepare ...\n", topNgram);
+		ArrayList<double[]> posVec2 = new ArrayList<double[]>();
+		ArrayList<double[]> negVec2 = new ArrayList<double[]>();
+		for (String pos : posTest) {
+			double[] vec = ModelUtilities.getCharacteristicVector(pos, Ngram,
+					mixPick);
+			posVec2.add(vec);
+		}
+		for (String neg : negTest) {
+			double[] vec = ModelUtilities.getCharacteristicVector(neg, Ngram,
+					mixPick);
+			negVec2.add(vec);
+		}
+		System.out.printf("Three-Ways Online top-%d testing ...\n", topNgram);
+		int ONLINE_TRAIN = 1;
+		int posIdx = 0, negIdx = 0;
+		int ac = 0, wa = 0;
+		int t1 = 0, t2 = 0, t3 = 0, t4 = 0;
+		while (posIdx < posTest.length || negIdx < negTest.length) {
+			boolean[] predict = new boolean[3];
+			boolean correct = false, meeting = false;
+			String views = null;
+			double[] viewsVec = null;
+			if ((Math.random() < 0.5 && posIdx < posTest.length)
+					|| (negIdx >= negTest.length)) {
+				views = posTest[posIdx];
+				viewsVec = posVec2.get(posIdx);
+				posIdx++;
+				correct = true;
+			} else if (negIdx < negTest.length) {
+				views = negTest[negIdx];
+				viewsVec = negVec2.get(negIdx);
+				negIdx++;
+				correct = false;
+			}
+			for (int discuss = 0; discuss < 1; discuss++) {
+				predict[0] = LMmachine.classify(views, mixPick);
+				predict[1] = MLmachine.classify(viewsVec);
+				predict[2] = PAmachine.classify(viewsVec);
+				int pos = 0, neg = 0;
+				for (int i = 0; i < 3; i++) {
+					if (predict[i] == true)
+						pos++;
+					else
+						neg++;
+				}
+				if (pos > neg)
+					meeting = true;
+				else
+					meeting = false;
+				if (pos == 3 || neg == 3) {
+					if (meeting != correct)
+						t1++;
+					else
+						t2++;
+					break;
+				}
+				meeting = predict[0];
+				if (predict[1] == predict[2])
+					meeting = predict[1];
+				if (predict[0] == predict[2])
+					meeting = predict[0];
+				if (meeting != correct)
+					t3++;
+				else
+					t4++;
+				break;
+//				for (int i = 0; i < 3; i++) {
+//					if (predict[i] != meeting) {
+//						switch (i) {
+//						case 0:
+//							LMmachine.add(views, meeting ? "pos" : "neg",
+//									mixPick);
+//							break;
+//						case 1:
+//							for (int it = 0; it < ONLINE_TRAIN; it++)
+//								MLmachine.add(viewsVec, meeting ? 1 : 0);
+//							break;
+//						case 2:
+//							for (int it = 0; it < ONLINE_TRAIN; it++)
+//								PAmachine.add(viewsVec, meeting ? 1 : -1);
+//							break;
+//						}
+//					}
+//				}
+			}
+			if (meeting == correct)
+				ac++;
+			else
+				wa++;
+		}
+		System.out.printf("%d / %d (AC/WA)\n", ac, wa);
+		System.out.printf("1-oponin %d / %d (AC/WA)\n", t2, t1);
+		System.out.printf("n-oponin %d / %d (AC/WA)\n", t4, t3);
+		return;
+	}
+
+	public static LanguageModel testLanguageModel(int Ngram, int topNgram,
 			ArrayList<nGram> mixPick, String[] posViews, String[] negViews,
 			String[] posTest, String[] negTest) {
 		System.out.printf("Language Model top-%d prepare ...\n", topNgram);
@@ -122,9 +227,10 @@ public class Main {
 		ModelUtilities.printTable(algName + " Class Positive", tablePos);
 		ModelUtilities.printTable(algName + " Class Negative", tableNeg);
 		ModelUtilities.printTable(algName + " Final", tableAll);
+		return LMmachine;
 	}
 
-	public static void testWinnow(int Ngram, int topNgram,
+	public static WinnowMachine testWinnow(int Ngram, int topNgram,
 			ArrayList<nGram> mixPick, String[] posViews, String[] negViews,
 			String[] posTest, String[] negTest) {
 		System.out.printf("Winnow algorithm top-%d prepare ...\n", topNgram);
@@ -172,12 +278,12 @@ public class Main {
 			negVec2.add(vec);
 		}
 		testClassifier("Winnow", MLmachine, posVec2, negVec2);
-		return;
+		return MLmachine;
 	}
 
-	public static void testPassiveAggressive(int Ngram, int topNgram,
-			ArrayList<nGram> mixPick, String[] posViews, String[] negViews,
-			String[] posTest, String[] negTest) {
+	public static PassiveAggressive testPassiveAggressive(int Ngram,
+			int topNgram, ArrayList<nGram> mixPick, String[] posViews,
+			String[] negViews, String[] posTest, String[] negTest) {
 		System.out.printf("Passive-Aggressive algorithm top-%d prepare ...\n",
 				topNgram);
 		PassiveAggressive PAmachine = new PassiveAggressive(topNgram);
@@ -225,7 +331,7 @@ public class Main {
 			negVec2.add(vec);
 		}
 		testClassifier("Passive-Aggressive", PAmachine, posVec2, negVec2);
-		return;
+		return PAmachine;
 	}
 
 	public static void testClassifier(String algName, Classifier classifier,
