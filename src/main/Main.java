@@ -28,6 +28,14 @@ public class Main {
 		String[] negTest = Arrays.copyOfRange(negViews,
 				negViews.length * 2 / 4, negViews.length);
 		int Ngram = 1;
+		int topNgram = 10000;
+
+		experiment(Ngram, topNgram, posTrain, negTrain, posTest, negTest);
+		experiment(Ngram, topNgram, posTest, negTest, posTrain, negTrain);
+	}
+
+	public static void experiment(int Ngram, int topNgram, String[] posTrain,
+			String[] negTrain, String[] posTest, String[] negTest) {
 		System.out.printf("positive sieve %d-grams building ...\n", Ngram);
 		DataSieve posSieve = new DataSieve(Ngram, posTrain, negTrain);
 
@@ -39,7 +47,6 @@ public class Main {
 		System.out.printf("positive #ngram = %d\n", posSieve.ngramCount);
 		System.out.printf("negative #ngram = %d\n", negSieve.ngramCount);
 
-		int topNgram = 10000;
 		ArrayList<nGram> posPick = posSieve.getBestNgram(topNgram);
 		ArrayList<nGram> negPick = negSieve.getBestNgram(topNgram);
 		ArrayList<nGram> mixPick = mergePick(posPick, negPick, topNgram);
@@ -156,24 +163,24 @@ public class Main {
 				else
 					t4++;
 				break;
-//				for (int i = 0; i < 3; i++) {
-//					if (predict[i] != meeting) {
-//						switch (i) {
-//						case 0:
-//							LMmachine.add(views, meeting ? "pos" : "neg",
-//									mixPick);
-//							break;
-//						case 1:
-//							for (int it = 0; it < ONLINE_TRAIN; it++)
-//								MLmachine.add(viewsVec, meeting ? 1 : 0);
-//							break;
-//						case 2:
-//							for (int it = 0; it < ONLINE_TRAIN; it++)
-//								PAmachine.add(viewsVec, meeting ? 1 : -1);
-//							break;
-//						}
-//					}
-//				}
+				// for (int i = 0; i < 3; i++) {
+				// if (predict[i] != meeting) {
+				// switch (i) {
+				// case 0:
+				// LMmachine.add(views, meeting ? "pos" : "neg",
+				// mixPick);
+				// break;
+				// case 1:
+				// for (int it = 0; it < ONLINE_TRAIN; it++)
+				// MLmachine.add(viewsVec, meeting ? 1 : 0);
+				// break;
+				// case 2:
+				// for (int it = 0; it < ONLINE_TRAIN; it++)
+				// PAmachine.add(viewsVec, meeting ? 1 : -1);
+				// break;
+				// }
+				// }
+				// }
 			}
 			if (meeting == correct)
 				ac++;
