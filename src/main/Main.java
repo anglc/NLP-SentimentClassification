@@ -153,11 +153,11 @@ public class Main {
 						t2++;
 					break;
 				}
-				meeting = predict[0];
-				if (predict[1] == predict[2])
+				meeting = predict[2];
+				if (predict[1] == predict[0])
 					meeting = predict[1];
-				if (predict[0] == predict[2])
-					meeting = predict[0];
+//				if (predict[2] == predict[0])
+//					meeting = predict[0];
 				if (meeting != correct)
 					t3++;
 				else
