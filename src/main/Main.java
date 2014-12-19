@@ -27,7 +27,7 @@ public class Main {
 				posViews.length * 2 / 4, posViews.length);
 		String[] negTest = Arrays.copyOfRange(negViews,
 				negViews.length * 2 / 4, negViews.length);
-		int Ngram = 1;
+		int Ngram = 3;
 		int topNgram = 10000;
 
 		experiment(Ngram, topNgram, posTrain, negTrain, posTest, negTest);

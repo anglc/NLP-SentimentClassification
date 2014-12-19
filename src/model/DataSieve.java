@@ -141,9 +141,8 @@ public class DataSieve {
 		Collections.sort(xsquare, new Comparator<nGram>() {
 			@Override
 			public int compare(nGram a, nGram b) {
-				if (a.score != b.score)
-					return a.score > b.score ? -1 : 1;
-				return 0;
+				int c = Double.compare(a.score, b.score);
+				return c == 1 ? -1 : (c == -1 ? 1 : 0);
 			}
 		});
 	}
