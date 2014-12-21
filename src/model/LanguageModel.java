@@ -2,6 +2,7 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 
 public class LanguageModel {
@@ -15,6 +16,7 @@ public class LanguageModel {
 	public TreeMap<String, Integer> categoryDataCount;
 	public TreeMap<String, Integer> categoryWordCount;
 	public int Ngram, dataCount;
+	public double threshold = -69;
 
 	public LanguageModel(int n) {
 		Ngram = n;
@@ -67,7 +69,48 @@ public class LanguageModel {
 		categoryWordCount.put(c, categoryWordCount.get(c) + total);
 	}
 
+	public String filiter(String s) {
+		String fs = "";
+		String[] stmt = s.split("\\.|,|:");
+		for (String ss : stmt) {
+			ArrayList<nGram> t = ModelUtilities.transformNgram(ss, Ngram);
+			TreeMap<nGram, Integer> record = new TreeMap<nGram, Integer>();
+			for (nGram e : t) {
+				int count = 1;
+				if (record.containsKey(e))
+					count = record.get(e) + 1;
+				record.put(e, count);
+			}
+			double maxPwc = -1e+30;
+			String chooseClass = "";
+
+			for (Map.Entry<String, Integer> entry : categoryDataCount
+					.entrySet()) {
+				double Pc, P, count_c, count_w_c;
+				TreeMap<nGram, Integer> S = wordCategory.get(entry.getKey());
+				Pc = (double) entry.getValue() / dataCount;
+				P = Math.log(Pc);
+				count_c = categoryDataCount.get(entry.getKey());
+				for (Map.Entry<nGram, Integer> w : record.entrySet()) {
+					count_w_c = 0;
+					if (S.containsKey(w.getKey()))
+						count_w_c = S.get(w.getKey());
+					P += Math.log((double) (count_w_c + 1)
+							/ (count_c + record.size()));
+				}
+				if (P > maxPwc) {
+					maxPwc = P;
+					chooseClass = entry.getKey();
+				}
+			}
+			if (maxPwc > threshold)
+				fs += ss + " . ";
+		}
+		return fs;
+	}
+
 	public boolean classify(String s, ArrayList<nGram> top) {
+		s = filiter(s);
 		ArrayList<nGram> t = ModelUtilities.transformNgram(s, Ngram);
 		TreeMap<nGram, Integer> record = new TreeMap<nGram, Integer>();
 		for (nGram e : t) {

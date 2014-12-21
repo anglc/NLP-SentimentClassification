@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -8,6 +9,12 @@ import java.util.TreeSet;
 public class ModelUtilities {
 	private static TreeMap<String, Integer> renameMap = new TreeMap<String, Integer>();
 	private static TreeMap<Integer, String> invRenameMap = new TreeMap<Integer, String>();
+	private static TreeMap<String, Integer> wordWeight = new TreeMap<String, Integer>();
+
+	public static void addWordWeight(TreeMap<String, Integer> w) {
+		for (Map.Entry<String, Integer> entry : w.entrySet())
+			wordWeight.put(entry.getKey(), entry.getValue());
+	}
 
 	public static int rename(String token) {
 		if (renameMap.containsKey(token)) {
@@ -71,11 +78,9 @@ public class ModelUtilities {
 			ArrayList<nGram> vec) {
 		ArrayList<nGram> t = transformNgram(s, n);
 		TreeMap<nGram, Integer> tMap = new TreeMap<nGram, Integer>();
-		for (int i = 0; i < t.size(); i++) {
-			int count = 1;
-			if (tMap.containsKey(t.get(i)))
-				count = tMap.get(t.get(i)) + 1;
-			tMap.put(t.get(i), count);
+		for (nGram e : t) {
+			int count = scoreNgram(e);
+			tMap.put(e, count);
 		}
 		double[] ret = new double[vec.size()];
 		for (int i = 0; i < vec.size(); i++) {
@@ -93,6 +98,16 @@ public class ModelUtilities {
 		return "";
 	}
 
+	public static int scoreNgram(nGram e) {
+		int ret = 1;
+		for (int i = 0; i < e.iWord.length; i++) {
+			String w = getWordName(e.iWord[i]);
+			if (wordWeight.containsKey(w))
+				ret += Math.abs(wordWeight.get(w));
+		}
+		return ret;
+	}
+
 	public static void printTable(String tableName, int table[][]) {
 		System.out.printf("Table `%s`\n", tableName);
 		System.out.printf("|%16s|%15s|%15s|\n", "Truth\\Classifier",
@@ -102,6 +117,8 @@ public class ModelUtilities {
 				table[0][1]);
 		System.out.printf("|%16s|%15d|%15d|\n", "Truth yes", table[1][0],
 				table[1][1]);
+		System.out.printf("P = %f %%\n", (double) table[1][1]
+				/ (table[1][0] + table[1][1]));
 		System.out.println();
 	}
 }

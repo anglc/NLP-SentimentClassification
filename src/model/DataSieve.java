@@ -132,9 +132,9 @@ public class DataSieve {
 			C = views.length - A;
 			D = otherViews.length - B;
 			assert (A + C != 0 && B + D != 0 && A + B != 0 && C + D != 0);
+			nGram e = entry.getKey();
 			double score = entry.getValue() * Math.pow(A * D - C * B, 2)
 					/ (A + C) / (B + D) / (A + B) / (C + D);
-			nGram e = entry.getKey();
 			e.score = score;
 			xsquare.add(e);
 		}

@@ -16,6 +16,7 @@ import model.nGram;
 public class Main {
 	public static void main(String[] args) {
 		Loader loader = new Loader("training_set");
+		ModelUtilities.addWordWeight(loader.wordWeight);
 		// Loader loader = new Loader("testcase");
 		String[] posViews = (String[]) loader.posViews.toArray(new String[0]);
 		String[] negViews = (String[]) loader.negViews.toArray(new String[0]);
@@ -27,7 +28,7 @@ public class Main {
 				posViews.length * 2 / 4, posViews.length);
 		String[] negTest = Arrays.copyOfRange(negViews,
 				negViews.length * 2 / 4, negViews.length);
-		int Ngram = 3;
+		int Ngram = 2;
 		int topNgram = 10000;
 
 		experiment(Ngram, topNgram, posTrain, negTrain, posTest, negTest);
@@ -188,6 +189,7 @@ public class Main {
 				wa++;
 		}
 		System.out.printf("%d / %d (AC/WA)\n", ac, wa);
+		System.out.printf("P = %f %%\n", ac * 100.0 / (ac + wa));
 		System.out.printf("1-oponin %d / %d (AC/WA)\n", t2, t1);
 		System.out.printf("n-oponin %d / %d (AC/WA)\n", t4, t3);
 		return;
@@ -248,12 +250,12 @@ public class Main {
 		ArrayList<double[]> posVec2 = new ArrayList<double[]>();
 		ArrayList<double[]> negVec2 = new ArrayList<double[]>();
 		for (String pos : posViews) {
-			double[] vec = ModelUtilities.getCharacteristicVector(pos, Ngram,
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos, Ngram,
 					mixPick);
 			posVec.add(vec);
 		}
 		for (String neg : negViews) {
-			double[] vec = ModelUtilities.getCharacteristicVector(neg, Ngram,
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg, Ngram,
 					mixPick);
 			negVec.add(vec);
 		}
@@ -275,12 +277,12 @@ public class Main {
 		System.out.printf("|\n");
 		System.out.printf("Winnow algorithm top-%d testing ...\n", topNgram);
 		for (String pos : posTest) {
-			double[] vec = ModelUtilities.getCharacteristicVector(pos, Ngram,
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos, Ngram,
 					mixPick);
 			posVec2.add(vec);
 		}
 		for (String neg : negTest) {
-			double[] vec = ModelUtilities.getCharacteristicVector(neg, Ngram,
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg, Ngram,
 					mixPick);
 			negVec2.add(vec);
 		}
@@ -300,12 +302,12 @@ public class Main {
 		ArrayList<double[]> posVec2 = new ArrayList<double[]>();
 		ArrayList<double[]> negVec2 = new ArrayList<double[]>();
 		for (String pos : posViews) {
-			double[] vec = ModelUtilities.getCharacteristicVector(pos, Ngram,
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos, Ngram,
 					mixPick);
 			posVec.add(vec);
 		}
 		for (String neg : negViews) {
-			double[] vec = ModelUtilities.getCharacteristicVector(neg, Ngram,
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg, Ngram,
 					mixPick);
 			negVec.add(vec);
 		}
@@ -328,12 +330,12 @@ public class Main {
 		System.out.printf("Passive-Aggressive algorithm top-%d testing ...\n",
 				topNgram);
 		for (String pos : posTest) {
-			double[] vec = ModelUtilities.getCharacteristicVector(pos, Ngram,
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos, Ngram,
 					mixPick);
 			posVec2.add(vec);
 		}
 		for (String neg : negTest) {
-			double[] vec = ModelUtilities.getCharacteristicVector(neg, Ngram,
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg, Ngram,
 					mixPick);
 			negVec2.add(vec);
 		}
