@@ -69,7 +69,7 @@ public class LanguageModel {
 		categoryWordCount.put(c, categoryWordCount.get(c) + total);
 	}
 
-	public String filiter(String s) {
+	public String filter(String s) {
 		String fs = "";
 		String[] stmt = s.split("\\.|,|:");
 		for (String ss : stmt) {
@@ -110,7 +110,7 @@ public class LanguageModel {
 	}
 
 	public boolean classify(String s, ArrayList<nGram> top) {
-		s = filiter(s);
+		s = filter(s);
 		ArrayList<nGram> t = ModelUtilities.transformNgram(s, Ngram);
 		TreeMap<nGram, Integer> record = new TreeMap<nGram, Integer>();
 		for (nGram e : t) {

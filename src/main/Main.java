@@ -31,8 +31,8 @@ public class Main {
 		int Ngram = 2;
 		int topNgram = 10000;
 
-		experiment(Ngram, topNgram, posTrain, negTrain, posTest, negTest);
 		experiment(Ngram, topNgram, posTest, negTest, posTrain, negTrain);
+		experiment(Ngram, topNgram, posTrain, negTrain, posTest, negTest);
 	}
 
 	public static void experiment(int Ngram, int topNgram, String[] posTrain,
