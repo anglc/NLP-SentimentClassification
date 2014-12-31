@@ -15,23 +15,23 @@ import model.nGram;
 
 public class Main {
 	public static void main(String[] args) {
-		Loader loader = new Loader("training_set");
-		ModelUtilities.addWordWeight(loader.wordWeight);
-		// Loader loader = new Loader("testcase");
-		String[] posViews = (String[]) loader.posViews.toArray(new String[0]);
-		String[] negViews = (String[]) loader.negViews.toArray(new String[0]);
-		String[] posTrain = Arrays.copyOfRange(posViews, 0,
-				posViews.length * 3 / 4);
-		String[] negTrain = Arrays.copyOfRange(negViews, 0,
-				negViews.length * 3 / 4);
-		String[] posTest = Arrays.copyOfRange(posViews,
-				posViews.length * 3 / 4, posViews.length);
-		String[] negTest = Arrays.copyOfRange(negViews,
-				negViews.length * 3 / 4, negViews.length);
 		int Ngram = 2;
 		int topNgram = 10000;
+		Loader loader = new Loader("training_set");
+		ShuffleChooser shuffleChooser = new ShuffleChooser(loader);
+		ModelUtilities.addWordWeight(loader.wordWeight);
+		String[] posTest, posTrain, negTest, negTrain;
 
-		experiment(Ngram, topNgram, posTest, negTest, posTrain, negTrain);
+		shuffleChooser.shuffle(3, 1);
+		posTest = shuffleChooser.posTest
+				.toArray(new String[shuffleChooser.posTest.size()]);
+		posTrain = shuffleChooser.posTrain
+				.toArray(new String[shuffleChooser.posTrain.size()]);
+		negTest = shuffleChooser.negTest
+				.toArray(new String[shuffleChooser.negTest.size()]);
+		negTrain = shuffleChooser.negTrain
+				.toArray(new String[shuffleChooser.negTrain.size()]);
+		
 		experiment(Ngram, topNgram, posTrain, negTrain, posTest, negTest);
 	}
 
@@ -63,7 +63,7 @@ public class Main {
 				posTest, negTest);
 		PAmachine = testPassiveAggressive(Ngram, topNgram, mixPick, posTrain,
 				negTrain, posTest, negTest);
-		testThreeWaysInterview(LMmachine, MLmachine, PAmachine, Ngram,
+		testMeetingInterview(LMmachine, MLmachine, PAmachine, Ngram,
 				topNgram, mixPick, posTest, negTest);
 	}
 
@@ -93,11 +93,11 @@ public class Main {
 		return ret;
 	}
 
-	public static void testThreeWaysInterview(LanguageModel LMmachine,
+	public static void testMeetingInterview(LanguageModel LMmachine,
 			WinnowMachine MLmachine, PassiveAggressive PAmachine, int Ngram,
 			int topNgram, ArrayList<nGram> mixPick, String[] posTest,
 			String[] negTest) {
-		System.out.printf("Three-Ways Online top-%d prepare ...\n", topNgram);
+		System.out.printf("Meeting top-%d prepare ...\n", topNgram);
 		ArrayList<double[]> posVec2 = new ArrayList<double[]>();
 		ArrayList<double[]> negVec2 = new ArrayList<double[]>();
 		for (String pos : posTest) {
@@ -110,7 +110,7 @@ public class Main {
 					mixPick);
 			negVec2.add(vec);
 		}
-		System.out.printf("Three-Ways Online top-%d testing ...\n", topNgram);
+		System.out.printf("Meeting top-%d testing ...\n", topNgram);
 		int ONLINE_TRAIN = 1;
 		int posIdx = 0, negIdx = 0;
 		int ac = 0, wa = 0;
@@ -157,8 +157,8 @@ public class Main {
 				meeting = predict[2];
 				if (predict[1] == predict[0])
 					meeting = predict[1];
-//				if (predict[2] == predict[0])
-//					meeting = predict[0];
+				// if (predict[2] == predict[0])
+				// meeting = predict[0];
 				if (meeting != correct)
 					t3++;
 				else
@@ -232,13 +232,13 @@ public class Main {
 		ArrayList<double[]> posVec2 = new ArrayList<double[]>();
 		ArrayList<double[]> negVec2 = new ArrayList<double[]>();
 		for (String pos : posViews) {
-			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos, Ngram,
-					mixPick);
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos,
+					Ngram, mixPick);
 			posVec.add(vec);
 		}
 		for (String neg : negViews) {
-			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg, Ngram,
-					mixPick);
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg,
+					Ngram, mixPick);
 			negVec.add(vec);
 		}
 		System.out.printf("complete |%40s|\n", "");
@@ -259,13 +259,13 @@ public class Main {
 		System.out.printf("|\n");
 		System.out.printf("Winnow algorithm top-%d testing ...\n", topNgram);
 		for (String pos : posTest) {
-			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos, Ngram,
-					mixPick);
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos,
+					Ngram, mixPick);
 			posVec2.add(vec);
 		}
 		for (String neg : negTest) {
-			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg, Ngram,
-					mixPick);
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg,
+					Ngram, mixPick);
 			negVec2.add(vec);
 		}
 		testClassifier("Winnow", MLmachine, posVec2, negVec2);
@@ -284,13 +284,13 @@ public class Main {
 		ArrayList<double[]> posVec2 = new ArrayList<double[]>();
 		ArrayList<double[]> negVec2 = new ArrayList<double[]>();
 		for (String pos : posViews) {
-			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos, Ngram,
-					mixPick);
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos,
+					Ngram, mixPick);
 			posVec.add(vec);
 		}
 		for (String neg : negViews) {
-			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg, Ngram,
-					mixPick);
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg,
+					Ngram, mixPick);
 			negVec.add(vec);
 		}
 		System.out.printf("complete |%40s|\n", "");
@@ -312,13 +312,13 @@ public class Main {
 		System.out.printf("Passive-Aggressive algorithm top-%d testing ...\n",
 				topNgram);
 		for (String pos : posTest) {
-			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos, Ngram,
-					mixPick);
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(pos,
+					Ngram, mixPick);
 			posVec2.add(vec);
 		}
 		for (String neg : negTest) {
-			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg, Ngram,
-					mixPick);
+			double[] vec = ModelUtilities.getCharacteristicWeightVector(neg,
+					Ngram, mixPick);
 			negVec2.add(vec);
 		}
 		testClassifier("Passive-Aggressive", PAmachine, posVec2, negVec2);
