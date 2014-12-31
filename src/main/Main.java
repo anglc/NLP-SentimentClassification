@@ -21,13 +21,13 @@ public class Main {
 		String[] posViews = (String[]) loader.posViews.toArray(new String[0]);
 		String[] negViews = (String[]) loader.negViews.toArray(new String[0]);
 		String[] posTrain = Arrays.copyOfRange(posViews, 0,
-				posViews.length * 2 / 4);
+				posViews.length * 3 / 4);
 		String[] negTrain = Arrays.copyOfRange(negViews, 0,
-				negViews.length * 2 / 4);
+				negViews.length * 3 / 4);
 		String[] posTest = Arrays.copyOfRange(posViews,
-				posViews.length * 2 / 4, posViews.length);
+				posViews.length * 3 / 4, posViews.length);
 		String[] negTest = Arrays.copyOfRange(negViews,
-				negViews.length * 2 / 4, negViews.length);
+				negViews.length * 3 / 4, negViews.length);
 		int Ngram = 2;
 		int topNgram = 10000;
 
@@ -164,24 +164,6 @@ public class Main {
 				else
 					t4++;
 				break;
-				// for (int i = 0; i < 3; i++) {
-				// if (predict[i] != meeting) {
-				// switch (i) {
-				// case 0:
-				// LMmachine.add(views, meeting ? "pos" : "neg",
-				// mixPick);
-				// break;
-				// case 1:
-				// for (int it = 0; it < ONLINE_TRAIN; it++)
-				// MLmachine.add(viewsVec, meeting ? 1 : 0);
-				// break;
-				// case 2:
-				// for (int it = 0; it < ONLINE_TRAIN; it++)
-				// PAmachine.add(viewsVec, meeting ? 1 : -1);
-				// break;
-				// }
-				// }
-				// }
 			}
 			if (meeting == correct)
 				ac++;
