@@ -94,10 +94,14 @@ public class DataSieve {
 	}
 
 	public ArrayList<nGram> getBestNgram(int k) {
+		SubGramSet subNgram = new SubGramSet();
 		ArrayList<nGram> ret = new ArrayList<nGram>();
-		for (int i = 0; i < k && i < xsquare.size(); i++) {
+		for (int i = 0; ret.size() < k && i < xsquare.size(); i++) {
 			nGram e = xsquare.get(i);
-			ret.add(e);
+			if (!subNgram.contains(e)) {
+				ret.add(e);
+				subNgram.add(e);
+			}
 		}
 		return ret;
 	}
@@ -142,7 +146,12 @@ public class DataSieve {
 			@Override
 			public int compare(nGram a, nGram b) {
 				int c = Double.compare(a.score, b.score);
-				return c == 1 ? -1 : (c == -1 ? 1 : 0);
+				if (c == 0) {
+					int an = a.getNonTerminal();
+					int bn = b.getNonTerminal();
+					return Integer.compare(an, bn);
+				}
+				return -c;
 			}
 		});
 	}

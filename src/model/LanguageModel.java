@@ -17,6 +17,7 @@ public class LanguageModel {
 	public TreeMap<String, Integer> categoryWordCount;
 	public int Ngram, dataCount;
 	public double threshold = -69;
+	public double selfMin, selfMax;
 
 	public LanguageModel(int n) {
 		Ngram = n;
@@ -31,6 +32,8 @@ public class LanguageModel {
 		categoryDataCount.put("neg", 0);
 		categoryWordCount.put("pos", 0);
 		categoryWordCount.put("neg", 0);
+
+		initSelfTraining();
 	}
 
 	/**
@@ -109,6 +112,22 @@ public class LanguageModel {
 		return fs;
 	}
 
+	private double probabilityOfClass(Map.Entry<String, Integer> classEntry,
+			TreeMap<nGram, Integer> record) {
+		double Pc, P, count_c, count_w_c;
+		TreeMap<nGram, Integer> S = wordCategory.get(classEntry.getKey());
+		Pc = (double) classEntry.getValue() / dataCount;
+		P = Math.log(Pc);
+		count_c = categoryDataCount.get(classEntry.getKey());
+		for (Map.Entry<nGram, Integer> w : record.entrySet()) {
+			count_w_c = 0;
+			if (S.containsKey(w.getKey()))
+				count_w_c = S.get(w.getKey());
+			P += Math.log((double) (count_w_c + 1) / (count_c + record.size()));
+		}
+		return P;
+	}
+
 	public boolean classify(String s, ArrayList<nGram> top) {
 		s = filter(s);
 		ArrayList<nGram> t = ModelUtilities.transformNgram(s, Ngram);
@@ -119,26 +138,65 @@ public class LanguageModel {
 				count = record.get(e) + 1;
 			record.put(e, count);
 		}
-		double maxPwc = -1e+30;
+		double maxPwc = -1e+70;
 		String chooseClass = "";
 		for (Map.Entry<String, Integer> entry : categoryDataCount.entrySet()) {
-			double Pc, P, count_c, count_w_c;
-			TreeMap<nGram, Integer> S = wordCategory.get(entry.getKey());
-			Pc = (double) entry.getValue() / dataCount;
-			P = Math.log(Pc);
-			count_c = categoryDataCount.get(entry.getKey());
-			for (Map.Entry<nGram, Integer> w : record.entrySet()) {
-				count_w_c = 0;
-				if (S.containsKey(w.getKey()))
-					count_w_c = S.get(w.getKey());
-				P += Math.log((double) (count_w_c + 1)
-						/ (count_c + record.size()));
-			}
+			double P = probabilityOfClass(entry, record);
 			if (P > maxPwc) {
 				maxPwc = P;
 				chooseClass = entry.getKey();
 			}
 		}
 		return chooseClass.equals("pos");
+	}
+
+	public double strongClassify(String s, ArrayList<nGram> top) {
+		s = filter(s);
+		ArrayList<nGram> t = ModelUtilities.transformNgram(s, Ngram);
+		TreeMap<nGram, Integer> record = new TreeMap<nGram, Integer>();
+		for (nGram e : t) {
+			int count = 1;
+			if (record.containsKey(e))
+				count = record.get(e) + 1;
+			record.put(e, count);
+		}
+		double maxPwc = -Double.MAX_VALUE;
+		for (Map.Entry<String, Integer> entry : categoryDataCount.entrySet()) {
+			double P = probabilityOfClass(entry, record);
+			if (P > maxPwc) {
+				maxPwc = P;
+			}
+		}
+		return (maxPwc - selfMin) / (selfMax - selfMin);
+	}
+
+	public void initSelfTraining() {
+		selfMin = Double.MAX_VALUE;
+		selfMax = -Double.MAX_VALUE;
+	}
+
+	public void selfTraining(String s, String c, ArrayList<nGram> top) {
+		s = filter(s);
+		ArrayList<nGram> t = ModelUtilities.transformNgram(s, Ngram);
+		TreeMap<nGram, Integer> record = new TreeMap<nGram, Integer>();
+		for (nGram e : t) {
+			int count = 1;
+			if (record.containsKey(e))
+				count = record.get(e) + 1;
+			record.put(e, count);
+		}
+		double maxPwc = -1e+70;
+		String chooseClass = "";
+		for (Map.Entry<String, Integer> entry : categoryDataCount.entrySet()) {
+			double P = probabilityOfClass(entry, record);
+			if (P > maxPwc) {
+				maxPwc = P;
+				chooseClass = entry.getKey();
+			}
+		}
+		if (chooseClass.equals(c)) {
+			selfMin = Math.min(selfMin, maxPwc);
+			selfMax = Math.max(selfMax, maxPwc);
+		}
 	}
 }

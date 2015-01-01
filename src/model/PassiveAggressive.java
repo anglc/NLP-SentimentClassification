@@ -1,20 +1,27 @@
 package model;
 
+import java.util.ArrayList;
+
 public class PassiveAggressive implements Classifier {
 	public double[] w;
-	public double threshold;
 	public int V;
+	public double selfMin, selfMax;
 
 	public PassiveAggressive(int V) {
 		this.V = V;
-		threshold = V / 512.0;
 		init();
+		initSelfTraining();
 	}
 
 	public void init() {
 		w = new double[V];
 		for (int i = 0; i < w.length; i++)
 			w[i] = 0;
+	}
+
+	public void initSelfTraining() {
+		selfMin = Double.MAX_VALUE;
+		selfMax = -Double.MAX_VALUE;
 	}
 
 	private int sign(double v) {
@@ -49,7 +56,8 @@ public class PassiveAggressive implements Classifier {
 		double l, tau;
 		ybar = classify(x) ? 1 : -1;
 		y = c;
-		if (ybar == y)	return;
+		if (ybar == y)
+			return;
 		l = Math.max(0, 1 - y * dot(x));
 		if (Math.abs(absSquare(x)) > 0.1) {
 			tau = l / absSquare(x);
@@ -69,5 +77,19 @@ public class PassiveAggressive implements Classifier {
 	public boolean classify(double x[]) {
 		assert (x.length == w.length);
 		return sign(dot(x)) > 0;
+	}
+
+	public double strongClassify(double x[]) {
+		double pc = Math.abs(dot(x));
+		return (pc - selfMin) / (selfMax - selfMin);
+	}
+
+	public void selfTraining(double x[], int c) {
+		int ybar = classify(x) ? 1 : -1;
+		if (ybar == c) {
+			double pc = Math.abs(dot(x));
+			selfMin = Math.min(selfMin, pc);
+			selfMax = Math.max(selfMax, pc);
+		}
 	}
 }

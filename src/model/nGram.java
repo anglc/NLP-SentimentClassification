@@ -44,4 +44,14 @@ public class nGram implements Comparable<Object> {
 		}
 		return 0;
 	}
+	
+	public int getNonTerminal() {
+		if (iWord != null) {
+			int ret = 0;
+			for	(int i = 0; i < iWord.length; i++)
+				ret += iWord[i] >= 0 ? 1 : 0;
+			return ret;
+		}
+		return 0;
+	}
 }
