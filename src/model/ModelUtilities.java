@@ -27,21 +27,34 @@ public class ModelUtilities {
 	}
 
 	public static String sieveString(String s) {
-		String[] regex = { "\\(", "\\)", "\"" };
+		String[] regex = { "\\(", "\\)", "\"", "!" };
 		for (String e : regex)
 			s = s.replaceAll(e, "");
 		return s;
 	}
 
+	public static String[] ignoreToken = { "the", "are", "is", "i", "it", "he",
+			"she", "-", "a", "an" };
+
+	public static boolean sieveToken(String s) {
+		for (String e : ignoreToken)
+			if (s.equals(e))
+				return false;
+		return true;
+	}
+
 	public static ArrayList<nGram> transformNgram(String s, int n) {
 		ArrayList<nGram> ret = new ArrayList<nGram>();
-		String[] stmt = s.split("\\.|,|:");
+		String[] stmt = s.split("\\.|,|:|;|\\?|!");
 		for (String ss : stmt) {
 			ss = sieveString(ss);
 			ArrayList<String> tokens = new ArrayList<String>();
 			StringTokenizer st = new StringTokenizer(ss);
-			while (st.hasMoreTokens())
-				tokens.add(st.nextToken());
+			while (st.hasMoreTokens()) {
+				String token = st.nextToken();
+				if (sieveToken(token))
+					tokens.add(token);
+			}
 			int[] iTokens = new int[tokens.size()];
 			for (int i = 0; i < tokens.size(); i++)
 				iTokens[i] = rename(tokens.get(i));
@@ -109,16 +122,63 @@ public class ModelUtilities {
 	}
 
 	public static void printTable(String tableName, int table[][]) {
-		System.out.printf("Table `%s`\n", tableName);
+		System.out.printf("Table `%s`\n\n", tableName);
 		System.out.printf("|%16s|%15s|%15s|\n", "Truth\\Classifier",
 				"Classifier no", "Classifier yes");
-		System.out.printf("|%16s|%15s|%15s|\n", "------", "------", "------");
+		System.out.printf("|%16s|%15s|%15s|\n", "----------------",
+				"---------------", "---------------");
 		System.out.printf("|%16s|%15d|%15d|\n", "Truth no", table[0][0],
 				table[0][1]);
 		System.out.printf("|%16s|%15d|%15d|\n", "Truth yes", table[1][0],
 				table[1][1]);
-		System.out.printf("P = %f %%\n", (double) table[1][1]
-				/ (table[1][0] + table[1][1]));
+
+		double P, R, F1, beta = 1;
+		P = (double) table[1][1] / (table[1][0] + table[1][1]);
+		R = (double) table[1][1] / (table[0][1] + table[1][1]);
+		F1 = (beta * beta + 1) * P * R / (beta * beta * P + R);
+		System.out.printf("\nP  %f %%, R  %f %%, F1  %f %%\n", P, R, F1);
 		System.out.println();
+	}
+
+	public static ArrayList<nGram> mergePick(ArrayList<nGram> a,
+			ArrayList<nGram> b, int n) {
+		SubGramSet subNgram = new SubGramSet();
+		ArrayList<nGram> ret = new ArrayList<nGram>();
+		nGram e = null;
+		int i = 0, j = 0;
+		while (ret.size() < n && i < a.size() && j < b.size()) {
+			e = null;
+			int comp = Double.compare(a.get(i).score, b.get(j).score);
+			if (comp == 1 || (comp == 0 && Math.random() > 0.5)) {
+				e = a.get(i);
+				i++;
+			} else {
+				e = b.get(j);
+				j++;
+			}
+			if (!subNgram.contains(e)) {
+				subNgram.add(e);
+				ret.add(e);
+			}
+		}
+
+		while (ret.size() < n && i < a.size()) {
+			e = a.get(i);
+			if (!subNgram.contains(e)) {
+				subNgram.add(e);
+				ret.add(e);
+			}
+			i++;
+		}
+
+		while (ret.size() < n && j < b.size()) {
+			e = b.get(j);
+			if (!subNgram.contains(e)) {
+				subNgram.add(e);
+				ret.add(e);
+			}
+			j++;
+		}
+		return ret;
 	}
 }
