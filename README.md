@@ -1,6 +1,11 @@
 # NLP SentimentClassification #
 
-[content](http://morris821028.github.io/2014/12/05/NLP-paper2/)
+[blog content](http://morris821028.github.io/2014/12/05/NLP-paper2/)
+
+## Reference ##
+
+2006 Comparative Experiments on Sentiment Classification for Online Product Reviews.
+Hang Cui, Vibhu Mittal, Mayur Datar [link](http://dl.acm.org/citation.cfm?id=1597389)
 
 ## To do ##
 
