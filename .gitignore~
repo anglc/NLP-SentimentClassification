@@ -16,7 +16,3 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-
-# classifier output generate
-/training_set/output/*.*
-
