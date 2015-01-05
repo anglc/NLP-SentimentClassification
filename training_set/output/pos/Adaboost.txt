@@ -9,7 +9,7 @@ cv807_21740.txt pos
 cv808_12635.txt pos
 cv809_5009.txt pos
 cv810_12458.txt pos
-cv811_21386.txt pos
+cv811_21386.txt neg
 cv812_17924.txt pos
 cv813_6534.txt pos
 cv814_18975.txt pos
@@ -26,7 +26,7 @@ cv824_8838.txt pos
 cv825_5063.txt neg
 cv826_11834.txt pos
 cv827_18331.txt neg
-cv828_19831.txt pos
+cv828_19831.txt neg
 cv829_20289.txt pos
 cv830_6014.txt pos
 cv831_14689.txt neg
@@ -54,7 +54,7 @@ cv852_27523.txt pos
 cv853_29233.txt pos
 cv854_17740.txt pos
 cv855_20661.txt neg
-cv856_29013.txt pos
+cv856_29013.txt neg
 cv857_15958.txt neg
 cv858_18819.txt pos
 cv859_14107.txt pos
@@ -76,12 +76,12 @@ cv874_11236.txt pos
 cv875_5754.txt pos
 cv876_9390.txt neg
 cv877_29274.txt pos
-cv878_15694.txt neg
+cv878_15694.txt pos
 cv879_14903.txt pos
 cv880_29800.txt pos
-cv881_13254.txt pos
-cv882_10026.txt pos
-cv883_27751.txt pos
+cv881_13254.txt neg
+cv882_10026.txt neg
+cv883_27751.txt neg
 cv884_13632.txt pos
 cv885_12318.txt pos
 cv886_18177.txt neg
@@ -91,8 +91,8 @@ cv889_21430.txt pos
 cv890_3977.txt neg
 cv891_6385.txt neg
 cv892_17576.txt pos
-cv893_26269.txt pos
-cv894_2068.txt pos
+cv893_26269.txt neg
+cv894_2068.txt neg
 cv895_21022.txt pos
 cv896_16071.txt pos
 cv897_10837.txt pos
@@ -102,7 +102,7 @@ cv900_10331.txt pos
 cv901_11017.txt pos
 cv902_12256.txt pos
 cv903_17822.txt pos
-cv904_24353.txt pos
+cv904_24353.txt neg
 cv905_29114.txt pos
 cv906_11491.txt pos
 cv907_3541.txt pos
@@ -123,7 +123,7 @@ cv921_12747.txt pos
 cv922_10073.txt pos
 cv923_11051.txt pos
 cv924_29540.txt pos
-cv925_8969.txt pos
+cv925_8969.txt neg
 cv926_17059.txt pos
 cv927_10681.txt pos
 cv928_9168.txt pos
@@ -138,7 +138,7 @@ cv936_15954.txt pos
 cv937_9811.txt pos
 cv938_10220.txt pos
 cv939_10583.txt pos
-cv940_17705.txt neg
+cv940_17705.txt pos
 cv941_10246.txt pos
 cv942_17082.txt pos
 cv943_22488.txt pos
@@ -146,15 +146,15 @@ cv944_13521.txt pos
 cv945_12160.txt pos
 cv946_18658.txt pos
 cv947_10601.txt neg
-cv948_24606.txt pos
+cv948_24606.txt neg
 cv949_20112.txt pos
 cv950_12350.txt pos
 cv951_10926.txt pos
-cv952_25240.txt pos
+cv952_25240.txt neg
 cv953_6836.txt pos
 cv954_18628.txt pos
 cv955_25001.txt pos
-cv956_11609.txt pos
+cv956_11609.txt neg
 cv957_8737.txt pos
 cv958_12162.txt pos
 cv959_14611.txt pos
@@ -162,7 +162,7 @@ cv960_29007.txt pos
 cv961_5682.txt pos
 cv962_9803.txt pos
 cv963_6895.txt neg
-cv964_6021.txt pos
+cv964_6021.txt neg
 cv965_26071.txt pos
 cv966_28832.txt pos
 cv967_5788.txt pos
@@ -170,7 +170,7 @@ cv968_24218.txt pos
 cv969_13250.txt pos
 cv970_18450.txt pos
 cv971_10874.txt pos
-cv972_26417.txt neg
+cv972_26417.txt pos
 cv973_10066.txt pos
 cv974_22941.txt pos
 cv975_10981.txt pos
@@ -185,7 +185,7 @@ cv983_22928.txt pos
 cv984_12767.txt pos
 cv985_6359.txt pos
 cv986_13527.txt pos
-cv987_6965.txt pos
+cv987_6965.txt neg
 cv988_18740.txt pos
 cv989_15824.txt pos
 cv990_11591.txt pos

@@ -1,10 +1,10 @@
 cv800_13494.txt neg
 cv801_26335.txt neg
 cv802_28381.txt neg
-cv803_8584.txt neg
+cv803_8584.txt pos
 cv804_11763.txt neg
 cv805_21128.txt neg
-cv806_9405.txt neg
+cv806_9405.txt pos
 cv807_23024.txt neg
 cv808_13773.txt pos
 cv809_5012.txt neg
@@ -13,13 +13,13 @@ cv811_22646.txt neg
 cv812_19051.txt neg
 cv813_6649.txt neg
 cv814_20316.txt neg
-cv815_23466.txt pos
+cv815_23466.txt neg
 cv816_15257.txt pos
 cv817_3675.txt neg
-cv818_10698.txt pos
+cv818_10698.txt neg
 cv819_9567.txt neg
 cv820_24157.txt neg
-cv821_29283.txt pos
+cv821_29283.txt neg
 cv822_21545.txt neg
 cv823_17055.txt neg
 cv824_9335.txt neg
@@ -50,7 +50,7 @@ cv848_10061.txt neg
 cv849_17215.txt neg
 cv850_18185.txt neg
 cv851_21895.txt pos
-cv852_27512.txt pos
+cv852_27512.txt neg
 cv853_29119.txt neg
 cv854_18955.txt neg
 cv855_22134.txt neg
@@ -65,7 +65,7 @@ cv863_7912.txt neg
 cv864_3087.txt neg
 cv865_28796.txt pos
 cv866_29447.txt neg
-cv867_18362.txt pos
+cv867_18362.txt neg
 cv868_12799.txt neg
 cv869_24782.txt neg
 cv870_18090.txt neg
@@ -78,7 +78,7 @@ cv876_9633.txt neg
 cv877_29132.txt neg
 cv878_17204.txt neg
 cv879_16585.txt neg
-cv880_29629.txt neg
+cv880_29629.txt pos
 cv881_14767.txt neg
 cv882_10042.txt neg
 cv883_27621.txt neg
@@ -97,7 +97,7 @@ cv895_22200.txt neg
 cv896_17819.txt neg
 cv897_11703.txt neg
 cv898_1576.txt neg
-cv899_17812.txt pos
+cv899_17812.txt neg
 cv900_10800.txt neg
 cv901_11934.txt neg
 cv902_13217.txt neg
@@ -122,7 +122,7 @@ cv920_29423.txt neg
 cv921_13988.txt neg
 cv922_10185.txt neg
 cv923_11951.txt neg
-cv924_29397.txt pos
+cv924_29397.txt neg
 cv925_9459.txt neg
 cv926_18471.txt pos
 cv927_11471.txt neg
@@ -142,7 +142,7 @@ cv940_18935.txt neg
 cv941_10718.txt pos
 cv942_18509.txt neg
 cv943_23547.txt neg
-cv944_15042.txt pos
+cv944_15042.txt neg
 cv945_13012.txt neg
 cv946_20084.txt neg
 cv947_11316.txt neg
@@ -164,8 +164,8 @@ cv962_9813.txt neg
 cv963_7208.txt pos
 cv964_5794.txt neg
 cv965_26688.txt neg
-cv966_28671.txt neg
-cv967_5626.txt pos
+cv966_28671.txt pos
+cv967_5626.txt neg
 cv968_25413.txt neg
 cv969_14760.txt neg
 cv970_19532.txt neg

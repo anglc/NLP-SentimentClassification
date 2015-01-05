@@ -44,7 +44,7 @@ cv842_5702.txt neg
 cv843_17054.txt pos
 cv844_13890.txt neg
 cv845_15886.txt pos
-cv846_29359.txt pos
+cv846_29359.txt neg
 cv847_20855.txt pos
 cv848_10061.txt neg
 cv849_17215.txt pos
@@ -75,7 +75,7 @@ cv873_19937.txt neg
 cv874_12182.txt neg
 cv875_5622.txt neg
 cv876_9633.txt neg
-cv877_29132.txt neg
+cv877_29132.txt pos
 cv878_17204.txt neg
 cv879_16585.txt neg
 cv880_29629.txt neg
@@ -90,7 +90,7 @@ cv888_25678.txt neg
 cv889_22670.txt neg
 cv890_3515.txt pos
 cv891_6035.txt pos
-cv892_18788.txt neg
+cv892_18788.txt pos
 cv893_26731.txt neg
 cv894_22140.txt neg
 cv895_22200.txt neg
