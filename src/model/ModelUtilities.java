@@ -52,6 +52,7 @@ public class ModelUtilities {
 			StringTokenizer st = new StringTokenizer(ss);
 			while (st.hasMoreTokens()) {
 				String token = st.nextToken();
+				token = token.toLowerCase();
 				if (sieveToken(token))
 					tokens.add(token);
 			}
