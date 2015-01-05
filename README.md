@@ -7,6 +7,12 @@
 2006 Comparative Experiments on Sentiment Classification for Online Product Reviews.
 Hang Cui, Vibhu Mittal, Mayur Datar [link](http://dl.acm.org/citation.cfm?id=1597389)
 
+## Extra data crawler ##
+
+* [25 Movies So Bad They're Unmissable](http://www.rottentomatoes.com/m/showgirls/news/1868670/1/25_movies_so_bad_theyre_unmissable/)
+* [The 50 Worst Movies Ever](http://www.empireonline.com/features/50-worst-movies-ever/default.asp?film=1)
+* [Rotten Tomatoes > Movie > On Dvd & Streaming > Browse All](http://www.rottentomatoes.com/)
+
 ## To do ##
 
 * add more features
