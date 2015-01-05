@@ -137,7 +137,7 @@ public class ModelUtilities {
 		P = (double) table[1][1] / (table[1][0] + table[1][1]);
 		R = (double) table[1][1] / (table[0][1] + table[1][1]);
 		F1 = (beta * beta + 1) * P * R / (beta * beta * P + R);
-		System.out.printf("\nP  %f %%, R  %f %%, F1  %f %%\n", P *  100, R * 100, F1 * 100);
+		System.out.printf("\nP  %.2f %%, R  %.2f %%, F1  %.2f %%\n", P *  100, R * 100, F1 * 100);
 		System.out.println();
 	}
 
