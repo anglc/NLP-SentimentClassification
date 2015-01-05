@@ -94,13 +94,24 @@ public class DataSieve {
 	}
 
 	public ArrayList<nGram> getBestNgram(int k) {
+		int[] pickWeight = new int[this.n];
 		SubGramSet subNgram = new SubGramSet();
+		pickWeight[0] = k;
+		for (int i = 0; i < this.n - 1; i++) {
+			int part = pickWeight[i] * 4 / 5;
+			pickWeight[i + 1] = pickWeight[i] - part;
+			pickWeight[i] = part;
+		}
 		ArrayList<nGram> ret = new ArrayList<nGram>();
 		for (int i = 0; ret.size() < k && i < xsquare.size(); i++) {
 			nGram e = xsquare.get(i);
 			if (!subNgram.contains(e)) {
-				ret.add(e);
-				subNgram.add(e);
+				int tmp = e.getNonTerminal();
+				if (pickWeight[tmp - 1] > 0) {
+					pickWeight[tmp - 1]--;
+					ret.add(e);
+					subNgram.add(e);
+				}
 			}
 		}
 		return ret;

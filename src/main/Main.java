@@ -26,7 +26,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		// Dashboard demo = new Dashboard();
-		work(4, 10000, "training_set", 3, 1);
+		work(6, 40000, "training_set", 1, 0);
 	}
 
 	public static void work(int Ngram, int topNgram, String trainingPath,
@@ -75,7 +75,7 @@ public class Main {
 					Ngram, mixPick);
 			negVec2.add(vec);
 		}
-		for (String unk : negTest) {
+		for (String unk : unkTest) {
 			double[] vec = ModelUtilities.getCharacteristicWeightVector(unk,
 					Ngram, mixPick);
 			unkVec2.add(vec);
@@ -98,13 +98,13 @@ public class Main {
 		System.out.printf("* positive sieve %d-grams building ...\n", Ngram);
 		DataSieve posSieve = new DataSieve(Ngram, posTrain, negTrain);
 
-		// posSieve.printBestNgram(100);
+		// posSieve.printBestNgram(20);
 		// System.exit(0);
 
 		System.out.printf("* negative sieve %d-grams building ...\n\n", Ngram);
 		DataSieve negSieve = new DataSieve(Ngram, negTrain, posTrain);
 
-		// negSieve.printBestNgram(100);
+		// negSieve.printBestNgram(20);
 		// System.exit(0);
 
 		System.out.printf("* positive #ngram %d\n", posSieve.ngramCount);
@@ -404,6 +404,8 @@ public class Main {
 
 	public static void testClassifier(String algName, Classifier classifier,
 			ArrayList<double[]> posVec, ArrayList<double[]> negVec) {
+		if (posVec.size() == 0 || negVec.size() == 0)
+			return;
 		int[][] tablePos, tableNeg, tableAll;
 		tablePos = new int[2][2];
 		tableNeg = new int[2][2];
@@ -437,6 +439,8 @@ public class Main {
 
 	public static void testLMClassifier(LanguageModel LMmachine,
 			String[] posTest, String[] negTest) {
+		if (posTest.length == 0 || negTest.length == 0)
+			return;
 		int[][] tablePos, tableNeg, tableAll;
 		tablePos = new int[2][2];
 		tableNeg = new int[2][2];

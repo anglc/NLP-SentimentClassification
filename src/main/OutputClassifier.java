@@ -217,9 +217,9 @@ public class OutputClassifier {
 			for (int i = 0; i < posOutput.size(); i++) {
 				String line = "";
 				if (posOutput.get(i) == 1)
-					line += "1 " + Main.loader.testPosName.get(i);
+					line += Main.loader.testPosName.get(i) + " pos";
 				else
-					line += "0 " + Main.loader.testPosName.get(i);
+					line += Main.loader.testPosName.get(i) + " neg";
 				printWriter.println(line);
 			}
 			printWriter.close();
@@ -227,9 +227,9 @@ public class OutputClassifier {
 			for (int i = 0; i < negOutput.size(); i++) {
 				String line = "";
 				if (negOutput.get(i) == 1)
-					line += "1 " + Main.loader.testNegName.get(i);
+					line += Main.loader.testNegName.get(i) + " pos";
 				else
-					line += "0 " + Main.loader.testNegName.get(i);
+					line += Main.loader.testNegName.get(i) + " neg";
 				printWriter.println(line);
 			}
 			printWriter.close();
@@ -237,9 +237,9 @@ public class OutputClassifier {
 			for (int i = 0; i < unkOutput.size(); i++) {
 				String line = "";
 				if (unkOutput.get(i) == 1)
-					line += "1 " + Main.loader.testUnknownName.get(i);
+					line += Main.loader.testUnknownName.get(i) + " pos";
 				else
-					line += "0 " + Main.loader.testUnknownName.get(i);
+					line += Main.loader.testUnknownName.get(i) + " neg";
 				printWriter.println(line);
 			}
 			printWriter.close();

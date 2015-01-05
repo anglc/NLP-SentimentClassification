@@ -48,6 +48,8 @@ public class Loader {
 	}
 
 	public void storeWord(File f) {
+		if (f != null && f.getName().charAt(0) == '.')
+			return;
 		try {
 			BufferedReader fin = new BufferedReader(new FileReader(f));
 			String line;
@@ -68,9 +70,11 @@ public class Loader {
 	}
 
 	public void storeFile(String path, int kind) {
-		File file = new File(path);
+		File f = new File(path);
+		if (f != null && f.getName().charAt(0) == '.')
+			return;
 		try {
-			BufferedReader fin = new BufferedReader(new FileReader(file));
+			BufferedReader fin = new BufferedReader(new FileReader(f));
 			StringBuilder sb = new StringBuilder();
 			String line, content = "";
 			while ((line = fin.readLine()) != null) {
@@ -87,15 +91,15 @@ public class Loader {
 				break;
 			case 2:
 				testPos.add(content);
-				testPosName.add(file.getName());
+				testPosName.add(f.getName());
 				break;
 			case -2:
 				testNeg.add(content);
-				testNegName.add(file.getName());
+				testNegName.add(f.getName());
 				break;
 			case 0:
 				testUnknown.add(content);
-				testUnknownName.add(file.getName());
+				testUnknownName.add(f.getName());
 				break;
 			}
 			fin.close();
