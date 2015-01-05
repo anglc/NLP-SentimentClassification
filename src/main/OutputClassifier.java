@@ -182,12 +182,8 @@ public class OutputClassifier {
 		}
 		for (String unk : unkTest) {
 			if (LMmachine.classify(unk, mixPick)) {
-				tableNeg[1][0]++;
-				tablePos[0][1]++;
 				unkOutput.add(1);
 			} else {
-				tableNeg[1][1]++;
-				tablePos[0][0]++;
 				unkOutput.add(0);
 			}
 		}

@@ -505,7 +505,7 @@ ivory_tower_neg.txt neg
 jack_reacher_neg.txt pos
 jack_the_giant_slayer_neg.txt neg
 jackass_presents_bad_grandpa_neg.txt neg
-java_heat_neg.txt pos
+java_heat_neg.txt neg
 jayne_mansfields_car_neg.txt pos
 jersey_shore_massacre_neg.txt neg
 jfk_the_smoking_gun_neg.txt neg
