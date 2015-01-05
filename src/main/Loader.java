@@ -5,12 +5,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.TreeMap;
+import java.util.TreeSet;
+
+import model.ModelUtilities;
 
 public class Loader {
 	private File posFolder, negFolder;
 	private File testPosFolder, testNegFolder, testUnknownFolder;
-	private File wordFile;
+	private File wordFile, stopWordsFile;
 	public TreeMap<String, Integer> wordWeight;
+	public TreeSet<String> stopWords;
 	public ArrayList<String> posViews, negViews;
 	public ArrayList<String> testPos, testNeg, testUnknown;
 	public ArrayList<String> testPosName, testNegName, testUnknownName;
@@ -44,10 +48,15 @@ public class Loader {
 
 		wordFile = new File(path + "/extra/AFINN-111.txt");
 		wordWeight = new TreeMap<String, Integer>();
-		storeWord(wordFile);
+		storeWordWeight(wordFile);
+		// = { "the", "are", "is", "i", "it", "he", "she", "-", "a", "an" }
+		stopWordsFile = new File(path + "/extra/stopwords.txt");
+		stopWords = new TreeSet<String>();
+		storeStopWords(stopWordsFile);
+		ModelUtilities.ignoreToken = stopWords;
 	}
 
-	public void storeWord(File f) {
+	public void storeWordWeight(File f) {
 		if (f != null && f.getName().charAt(0) == '.')
 			return;
 		try {
@@ -62,6 +71,25 @@ public class Loader {
 				if (wordWeight.containsKey(word))
 					weight += wordWeight.get(word);
 				wordWeight.put(word, weight);
+			}
+			fin.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void storeStopWords(File f) {
+		if (f != null && f.getName().charAt(0) == '.')
+			return;
+		try {
+			BufferedReader fin = new BufferedReader(new FileReader(f));
+			String line;
+			while ((line = fin.readLine()) != null) {
+				String[] s = line.split("\\s+");
+				if (s.length != 1)
+					continue;
+				String word = s[0];
+				stopWords.add(word);
 			}
 			fin.close();
 		} catch (Exception e) {

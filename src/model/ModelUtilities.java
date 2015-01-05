@@ -30,11 +30,11 @@ public class ModelUtilities {
 		String[] regex = { "\\(", "\\)", "\"", "!" };
 		for (String e : regex)
 			s = s.replaceAll(e, "");
+		s = s.replaceAll("n't", " not");
 		return s;
 	}
 
-	public static String[] ignoreToken = { "the", "are", "is", "i", "it", "he",
-			"she", "-", "a", "an" };
+	public static TreeSet<String> ignoreToken = new TreeSet<String>();
 
 	public static boolean sieveToken(String s) {
 		for (String e : ignoreToken)
