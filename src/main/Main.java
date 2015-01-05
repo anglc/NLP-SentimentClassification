@@ -14,7 +14,7 @@ import model.PassiveAggressive;
 import model.SubGramSet;
 import model.WinnowMachine;
 import model.nGram;
-
+//test
 public class Main {
 
 	public static LanguageModel LMmachine;
