@@ -26,7 +26,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		// Dashboard demo = new Dashboard();
-		work(6, 20000, "training_set", 1, 0);
+		work(4, 40000, "training_set", 1, 0);
 	}
 
 	public static void work(int Ngram, int topNgram, String trainingPath,
