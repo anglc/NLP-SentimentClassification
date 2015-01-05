@@ -37,9 +37,8 @@ public class ModelUtilities {
 	public static TreeSet<String> ignoreToken = new TreeSet<String>();
 
 	public static boolean sieveToken(String s) {
-		for (String e : ignoreToken)
-			if (s.equals(e))
-				return false;
+		if (ignoreToken.contains(s))
+			return false;
 		return true;
 	}
 
@@ -55,19 +54,40 @@ public class ModelUtilities {
 				token = token.toLowerCase();
 				if (sieveToken(token))
 					tokens.add(token);
+				else {
+					if (tokens.size() > 0) {
+						int[] iTokens = new int[tokens.size()];
+						for (int i = 0; i < tokens.size(); i++)
+							iTokens[i] = rename(tokens.get(i));
+						for (int k = 1; k <= n; k++) {
+							for (int i = 0; i < tokens.size(); i++) {
+								int[] a = new int[n];
+								for (int j = 0; j < n; j++)
+									a[j] = -1;
+								for (int j = 0; j < k && i + j < tokens.size(); j++)
+									a[j] = iTokens[i + j];
+								nGram e = new nGram(a);
+								ret.add(e);
+							}
+						}
+						tokens.clear();
+					}
+				}
 			}
-			int[] iTokens = new int[tokens.size()];
-			for (int i = 0; i < tokens.size(); i++)
-				iTokens[i] = rename(tokens.get(i));
-			for (int k = 1; k <= n; k++) {
-				for (int i = 0; i < tokens.size(); i++) {
-					int[] a = new int[n];
-					for (int j = 0; j < n; j++)
-						a[j] = -1;
-					for (int j = 0; j < k && i + j < tokens.size(); j++)
-						a[j] = iTokens[i + j];
-					nGram e = new nGram(a);
-					ret.add(e);
+			if (tokens.size() > 0) {
+				int[] iTokens = new int[tokens.size()];
+				for (int i = 0; i < tokens.size(); i++)
+					iTokens[i] = rename(tokens.get(i));
+				for (int k = 1; k <= n; k++) {
+					for (int i = 0; i < tokens.size(); i++) {
+						int[] a = new int[n];
+						for (int j = 0; j < n; j++)
+							a[j] = -1;
+						for (int j = 0; j < k && i + j < tokens.size(); j++)
+							a[j] = iTokens[i + j];
+						nGram e = new nGram(a);
+						ret.add(e);
+					}
 				}
 			}
 		}
@@ -137,7 +157,8 @@ public class ModelUtilities {
 		P = (double) table[1][1] / (table[1][0] + table[1][1]);
 		R = (double) table[1][1] / (table[0][1] + table[1][1]);
 		F1 = (beta * beta + 1) * P * R / (beta * beta * P + R);
-		System.out.printf("\nP  %.2f %%, R  %.2f %%, F1  %.2f %%\n", P *  100, R * 100, F1 * 100);
+		System.out.printf("\nP  %.2f %%, R  %.2f %%, F1  %.2f %%\n", P * 100,
+				R * 100, F1 * 100);
 		System.out.println();
 	}
 

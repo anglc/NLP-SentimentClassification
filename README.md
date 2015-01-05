@@ -29,6 +29,9 @@ Hang Cui, Vibhu Mittal, Mayur Datar [link](http://dl.acm.org/citation.cfm?id=159
 * JavaSE-1.7
 * Eclipse
 
+If you compiler error with `NOT FOUND MAIN CLASS` on eclipse, find menu bar `Project > Clean ...` and run it to rebuild `/bin`.
+
+
 ## Sample Output (stdout) ##
 
 with markdown format, and classifier will output under `path/output/`. For example, `training_set/ouotput/neg/Adaboost.txt`.
