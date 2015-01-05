@@ -101,6 +101,8 @@ public class DataSieve {
 			int part = pickWeight[i] * 4 / 5;
 			pickWeight[i + 1] = pickWeight[i] - part;
 			pickWeight[i] = part;
+			if (pickWeight[i + 1] < 10)
+				pickWeight[i + 1] = 10;
 		}
 		ArrayList<nGram> ret = new ArrayList<nGram>();
 		for (int i = 0; ret.size() < k && i < xsquare.size(); i++) {

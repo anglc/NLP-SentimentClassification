@@ -12,7 +12,7 @@ cv810_12458.txt pos
 cv811_21386.txt pos
 cv812_17924.txt pos
 cv813_6534.txt pos
-cv814_18975.txt pos
+cv814_18975.txt neg
 cv815_22456.txt pos
 cv816_13655.txt pos
 cv817_4041.txt neg
@@ -40,7 +40,7 @@ cv838_24728.txt pos
 cv839_21467.txt pos
 cv840_16321.txt pos
 cv841_3967.txt pos
-cv842_5866.txt neg
+cv842_5866.txt pos
 cv843_15544.txt pos
 cv844_12690.txt pos
 cv845_14290.txt pos
@@ -82,14 +82,14 @@ cv880_29800.txt pos
 cv881_13254.txt pos
 cv882_10026.txt neg
 cv883_27751.txt pos
-cv884_13632.txt pos
+cv884_13632.txt neg
 cv885_12318.txt pos
 cv886_18177.txt neg
 cv887_5126.txt pos
 cv888_24435.txt pos
-cv889_21430.txt neg
+cv889_21430.txt pos
 cv890_3977.txt pos
-cv891_6385.txt neg
+cv891_6385.txt pos
 cv892_17576.txt pos
 cv893_26269.txt pos
 cv894_2068.txt pos
@@ -193,7 +193,7 @@ cv991_18645.txt pos
 cv992_11962.txt pos
 cv993_29737.txt pos
 cv994_12270.txt pos
-cv995_21821.txt neg
+cv995_21821.txt pos
 cv996_11592.txt pos
 cv997_5046.txt pos
 cv998_14111.txt pos
