@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Arrays;
+
 public class nGram implements Comparable<Object> {
 	public String[] sWord;
 	public int[] iWord;
@@ -44,14 +46,19 @@ public class nGram implements Comparable<Object> {
 		}
 		return 0;
 	}
-	
+
 	public int getNonTerminal() {
 		if (iWord != null) {
 			int ret = 0;
-			for	(int i = 0; i < iWord.length; i++)
+			for (int i = 0; i < iWord.length; i++)
 				ret += iWord[i] >= 0 ? 1 : 0;
 			return ret;
 		}
 		return 0;
+	}
+
+	public void dag() {
+		if (iWord != null)
+			Arrays.sort(iWord, 0, getNonTerminal());
 	}
 }

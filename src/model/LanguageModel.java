@@ -2,8 +2,8 @@ package model;
 
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class LanguageModel {
 	/*
@@ -45,26 +45,17 @@ public class LanguageModel {
 	 * @param top
 	 *            `DataSieve` best n-gram
 	 */
-	public void add(String s, String c, ArrayList<nGram> top) {
+	public void add(String s, String c, TreeSet<nGram> top) {
 		dataCount++;
 		ArrayList<nGram> t = ModelUtilities.transformNgram(s, Ngram);
-		TreeMap<nGram, Integer> record = new TreeMap<nGram, Integer>();
 		TreeMap<nGram, Integer> S = wordCategory.get(c);
-		for (nGram e : t) {
-			int count = 1;
-			if (record.containsKey(e))
-				count = record.get(e) + 1;
-			record.put(e, count);
-		}
-
 		int total = 0;
-		for (nGram e : top) {
-			if (record.containsKey(e)) {
-				int wcount = record.get(e), count;
-				count = wcount;
-				total += wcount;
+		for (nGram e : t) {
+			if (top.contains(e)) {
+				total++;
+				int count = 1;
 				if (S.containsKey(e))
-					count = S.get(e) + wcount;
+					count = S.get(e) + 1;
 				S.put(e, count);
 			}
 		}
@@ -85,7 +76,6 @@ public class LanguageModel {
 				record.put(e, count);
 			}
 			double maxPwc = -1e+30;
-			String chooseClass = "";
 
 			for (Map.Entry<String, Integer> entry : categoryDataCount
 					.entrySet()) {
@@ -103,7 +93,6 @@ public class LanguageModel {
 				}
 				if (P > maxPwc) {
 					maxPwc = P;
-					chooseClass = entry.getKey();
 				}
 			}
 			if (maxPwc > threshold)
@@ -118,17 +107,19 @@ public class LanguageModel {
 		TreeMap<nGram, Integer> S = wordCategory.get(className);
 		Pc = (double) classCount / dataCount;
 		P = Math.log(Pc);
+		// P = Pc;
 		count_c = categoryDataCount.get(className);
 		for (Map.Entry<nGram, Integer> w : record.entrySet()) {
 			count_w_c = 0;
 			if (S.containsKey(w.getKey()))
 				count_w_c = S.get(w.getKey());
-			P += Math.log((double) (count_w_c + 1) / (count_c + record.size()));
+			// P = P * (count_w_c + 1) / (count_c + record.size());
+			P += Math.log((count_w_c + 1)) - Math.log(count_c + record.size());
 		}
 		return P;
 	}
 
-	public boolean classify(String s, ArrayList<nGram> top) {
+	public boolean classify(String s) {
 		s = filter(s);
 		ArrayList<nGram> t = ModelUtilities.transformNgram(s, Ngram);
 		TreeMap<nGram, Integer> record = new TreeMap<nGram, Integer>();
@@ -138,7 +129,7 @@ public class LanguageModel {
 				count = record.get(e) + 1;
 			record.put(e, count);
 		}
-		double maxPwc = -1e+70, P;
+		double maxPwc = -Double.MAX_VALUE, P;
 		String chooseClass = "";
 		for (Map.Entry<String, Integer> entry : categoryDataCount.entrySet()) {
 			P = probabilityOfClass(entry.getKey(), entry.getValue(), record);
@@ -150,8 +141,7 @@ public class LanguageModel {
 		return chooseClass.equals("pos");
 	}
 
-	public double strongClassify(String s, String className,
-			ArrayList<nGram> top) {
+	public double strongClassify(String s, String className) {
 		int classCount = categoryDataCount.get(className);
 		s = filter(s);
 		ArrayList<nGram> t = ModelUtilities.transformNgram(s, Ngram);
@@ -165,12 +155,11 @@ public class LanguageModel {
 
 		double P = probabilityOfClass(className, classCount, record);
 
-		return (P - selfMin) / (selfMax - selfMin);
+		return P / selfMax;
 	}
 
-	public double strongClassify(String s, ArrayList<nGram> top) {
-		return Math.max(strongClassify(s, "pos", top),
-				strongClassify(s, "neg", top));
+	public double strongClassify(String s) {
+		return Math.max(strongClassify(s, "pos"), strongClassify(s, "neg"));
 	}
 
 	public void initSelfTraining() {
@@ -178,7 +167,7 @@ public class LanguageModel {
 		selfMax = -Double.MAX_VALUE;
 	}
 
-	public void selfTraining(String s, String c, ArrayList<nGram> top) {
+	public void selfTraining(String s, String c) {
 		s = filter(s);
 		ArrayList<nGram> t = ModelUtilities.transformNgram(s, Ngram);
 		TreeMap<nGram, Integer> record = new TreeMap<nGram, Integer>();
@@ -188,7 +177,7 @@ public class LanguageModel {
 				count = record.get(e) + 1;
 			record.put(e, count);
 		}
-		double maxPwc = -1e+70, P;
+		double maxPwc = -Double.MAX_VALUE, P;
 		String chooseClass = "";
 		for (Map.Entry<String, Integer> entry : categoryDataCount.entrySet()) {
 			P = probabilityOfClass(entry.getKey(), entry.getValue(), record);

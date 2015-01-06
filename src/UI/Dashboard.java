@@ -125,7 +125,7 @@ public class Dashboard extends JFrame {
 				int Ngram = (Integer) ngramSpinner.getValue();
 				int topNgram = (Integer) topSpinner.getValue();
 				String trainingPath = trainingField.getText();
-				Main.work(Ngram, topNgram, trainingPath, 1, 1);
+				Main.work(Ngram, topNgram, trainingPath);
 			}
 			
 		});

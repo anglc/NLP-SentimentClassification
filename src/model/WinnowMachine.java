@@ -1,5 +1,8 @@
 package model;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 public class WinnowMachine implements Classifier {
 	public double[] f;
 	public double threshold;
@@ -24,11 +27,14 @@ public class WinnowMachine implements Classifier {
 		selfMax = -Double.MAX_VALUE;
 	}
 
-	double hFunction(double x[]) {
-		assert (x.length == f.length);
+	double hFunction(TreeMap<Integer, Double> x) {
+		// assert (x.length == f.length);
 		double sum = 0;
-		for (int i = 0; i < x.length; i++)
-			sum += x[i] * f[i];
+		for (Map.Entry<Integer, Double> e : x.entrySet()) {
+			int i = e.getKey();
+			if (i < f.length)
+				sum += f[i] * e.getValue();
+		}
 		return sum;
 	}
 
@@ -39,22 +45,26 @@ public class WinnowMachine implements Classifier {
 	 * @param c
 	 *            belong class 1 or 0
 	 */
-	public void add(double x[], int c) {
-		assert (x.length == f.length);
+	public void add(TreeMap<Integer, Double> x, int c) {
+		// assert (x.length == f.length);
 		double hx = hFunction(x);
 		if (c == 1) {
 			if (hx < threshold) {
-				for (int i = 0; i < x.length; i++)
-					if (x[i] > 0)
-						f[i] = f[i] * 2;
+				for (Map.Entry<Integer, Double> e : x.entrySet()) {
+					int i = e.getKey();
+					if (i < f.length)
+						f[i] *= 2;
+				}
 			} else {
 				return;
 			}
 		} else {
 			if (hx > threshold) {
-				for (int i = 0; i < x.length; i++)
-					if (x[i] > 0)
-						f[i] = f[i] / 2;
+				for (Map.Entry<Integer, Double> e : x.entrySet()) {
+					int i = e.getKey();
+					if (i < f.length)
+						f[i] /= 2;
+				}
 			} else {
 				return;
 			}
@@ -67,18 +77,18 @@ public class WinnowMachine implements Classifier {
 	 * @return whether in this class.
 	 */
 	@Override
-	public boolean classify(double x[]) {
-		assert (x.length == f.length);
+	public boolean classify(TreeMap<Integer, Double> x) {
+		// assert (x.length == f.length);
 		double hx = hFunction(x);
 		return hx > threshold;
 	}
 
-	public double strongClassify(double x[]) {
+	public double strongClassify(TreeMap<Integer, Double> x) {
 		double hx = Math.abs(hFunction(x) - threshold);
-		return (hx - selfMin) / (selfMax - selfMin);
+		return (hx) / (selfMax);
 	}
 
-	public void selfTraining(double x[], int c) {
+	public void selfTraining(TreeMap<Integer, Double> x, int c) {
 		int ybar = classify(x) ? 1 : -1;
 		if (ybar == c) {
 			double pc = Math.abs(hFunction(x) - threshold);

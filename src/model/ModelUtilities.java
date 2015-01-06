@@ -42,6 +42,27 @@ public class ModelUtilities {
 		return true;
 	}
 
+	public static ArrayList<nGram> transfromNgramPhrase(
+			ArrayList<String> tokens, int n) {
+		ArrayList<nGram> ret = new ArrayList<nGram>();
+		int[] iTokens = new int[tokens.size()];
+		for (int i = 0; i < tokens.size(); i++)
+			iTokens[i] = rename(tokens.get(i));
+		for (int k = 1; k <= n; k++) {
+			for (int i = 0; i < tokens.size(); i++) {
+				int[] a = new int[n];
+				for (int j = 0; j < n; j++)
+					a[j] = -1;
+				for (int j = 0; j < k && i + j < tokens.size(); j++)
+					a[j] = iTokens[i + j];
+				nGram e = new nGram(a);
+				e.dag();
+				ret.add(e);
+			}
+		}
+		return ret;
+	}
+
 	public static ArrayList<nGram> transformNgram(String s, int n) {
 		ArrayList<nGram> ret = new ArrayList<nGram>();
 		String[] stmt = s.split("\\.|,|:|;|\\?|!");
@@ -56,40 +77,13 @@ public class ModelUtilities {
 					tokens.add(token);
 				else {
 					if (tokens.size() > 0) {
-						int[] iTokens = new int[tokens.size()];
-						for (int i = 0; i < tokens.size(); i++)
-							iTokens[i] = rename(tokens.get(i));
-						for (int k = 1; k <= n; k++) {
-							for (int i = 0; i < tokens.size(); i++) {
-								int[] a = new int[n];
-								for (int j = 0; j < n; j++)
-									a[j] = -1;
-								for (int j = 0; j < k && i + j < tokens.size(); j++)
-									a[j] = iTokens[i + j];
-								nGram e = new nGram(a);
-								ret.add(e);
-							}
-						}
+						ret.addAll(transfromNgramPhrase(tokens, n));
 						tokens.clear();
 					}
 				}
 			}
-			if (tokens.size() > 0) {
-				int[] iTokens = new int[tokens.size()];
-				for (int i = 0; i < tokens.size(); i++)
-					iTokens[i] = rename(tokens.get(i));
-				for (int k = 1; k <= n; k++) {
-					for (int i = 0; i < tokens.size(); i++) {
-						int[] a = new int[n];
-						for (int j = 0; j < n; j++)
-							a[j] = -1;
-						for (int j = 0; j < k && i + j < tokens.size(); j++)
-							a[j] = iTokens[i + j];
-						nGram e = new nGram(a);
-						ret.add(e);
-					}
-				}
-			}
+			if (tokens.size() > 0)
+				ret.addAll(transfromNgramPhrase(tokens, n));
 		}
 		return ret;
 	}
@@ -108,20 +102,20 @@ public class ModelUtilities {
 		return ret;
 	}
 
-	public static double[] getCharacteristicWeightVector(String s, int n,
-			ArrayList<nGram> vec) {
+	public static TreeMap<Integer, Double> getCharacteristicWeightVector(
+			String s, int n, TreeMap<nGram, Integer> mixPickPosMap) {
 		ArrayList<nGram> t = transformNgram(s, n);
 		TreeMap<nGram, Integer> tMap = new TreeMap<nGram, Integer>();
 		for (nGram e : t) {
 			int count = scoreNgram(e);
 			tMap.put(e, count);
 		}
-		double[] ret = new double[vec.size()];
-		for (int i = 0; i < vec.size(); i++) {
-			if (tMap.containsKey(vec.get(i)))
-				ret[i] = tMap.get(vec.get(i));
-			else
-				ret[i] = 0;
+		TreeMap<Integer, Double> ret = new TreeMap<Integer, Double>();
+		for (Map.Entry<nGram, Integer> e : tMap.entrySet()) {
+			if (mixPickPosMap.containsKey(e.getKey())) {
+				double v = e.getValue();
+				ret.put(mixPickPosMap.get(e.getKey()), v);
+			}
 		}
 		return ret;
 	}
@@ -163,24 +157,31 @@ public class ModelUtilities {
 	}
 
 	public static ArrayList<nGram> mergePick(ArrayList<nGram> a,
-			ArrayList<nGram> b, int n) {
+			ArrayList<nGram> b, int n, TreeSet<nGram> posPickSet,
+			TreeSet<nGram> negPickSet) {
 		SubGramSet subNgram = new SubGramSet();
 		ArrayList<nGram> ret = new ArrayList<nGram>();
 		nGram e = null;
 		int i = 0, j = 0;
 		while (ret.size() < n && i < a.size() && j < b.size()) {
 			e = null;
-			int comp = Double.compare(a.get(i).score, b.get(j).score);
+			int comp = Double.compare(a.get(i).score, b.get(j).score), from = 0;
 			if (comp == 1 || (comp == 0 && Math.random() > 0.5)) {
 				e = a.get(i);
 				i++;
+				from = 0;
 			} else {
 				e = b.get(j);
 				j++;
+				from = 1;
 			}
 			if (!subNgram.contains(e)) {
 				subNgram.add(e);
 				ret.add(e);
+				if (from == 0)
+					posPickSet.add(e);
+				else
+					negPickSet.add(e);
 			}
 		}
 
@@ -189,6 +190,7 @@ public class ModelUtilities {
 			if (!subNgram.contains(e)) {
 				subNgram.add(e);
 				ret.add(e);
+				posPickSet.add(e);
 			}
 			i++;
 		}
@@ -198,6 +200,7 @@ public class ModelUtilities {
 			if (!subNgram.contains(e)) {
 				subNgram.add(e);
 				ret.add(e);
+				negPickSet.add(e);
 			}
 			j++;
 		}
