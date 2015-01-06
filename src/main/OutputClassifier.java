@@ -63,7 +63,7 @@ public class OutputClassifier {
 			predictWeight[2] = PAmachine.strongClassify(viewsVec);
 			predictWeight[3] = lv1DecisionTree.strongClassify(viewsOcc);
 			predictWeight[0] = 1;
-			predictWeight[3] = 0;
+			predictWeight[3] = 1;
 			
 //			voteArr[0] = LMmachine.strongClassify(views, "pos");
 //			voteArr[4] = -LMmachine.strongClassify(views, "neg");
@@ -71,7 +71,7 @@ public class OutputClassifier {
 				if (predict[j])
 					voteArr[j] = predictWeight[j];
 				else
-					voteArr[j] = -predictWeight[j];
+					voteArr[4 + j] = -predictWeight[j];
 			}
 			for (int j = 0; j < 8; j++) {
 				voteVec.put(j, voteArr[j]);

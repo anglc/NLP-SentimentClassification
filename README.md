@@ -5,10 +5,13 @@
 ## Reference ##
 
 2006 Comparative Experiments on Sentiment Classification for Online Product Reviews.
-Hang Cui, Vibhu Mittal, Mayur Datar [link](http://dl.acm.org/citation.cfm?id=1597389)
+Hang Cui, Vibhu Mittal, Mayur Datar[1]
 
-## Extra data crawler ##
+[1]: (http://dl.acm.org/citation.cfm?id=1597389)
 
+## data crawler ##
+
+* [1000 positive and 1000 negative processed reviews](http://www.cs.cornell.edu/People/pabo/movie-review-data/)
 * [25 Movies So Bad They're Unmissable](http://www.rottentomatoes.com/m/showgirls/news/1868670/1/25_movies_so_bad_theyre_unmissable/)
 * [The 50 Worst Movies Ever](http://www.empireonline.com/features/50-worst-movies-ever/default.asp?film=1)
 * [Rotten Tomatoes > Movie > On Dvd & Streaming > Browse All](http://www.rottentomatoes.com/)
@@ -19,10 +22,10 @@ Hang Cui, Vibhu Mittal, Mayur Datar [link](http://dl.acm.org/citation.cfm?id=159
 
 ## Complete ##
 
-* Simple Passive-Aggressive Algorithm
-* Simple Winnow algorithm
-* Simple Language Modeling
-* Passive-Aggressive Algorithm & Winnow algorithm adjust training
+* Simple Passive-Aggressive Algorithm[1]
+* Simple Winnow algorithm[1]
+* Simple Language Modeling[1]
+* Passive-Aggressive Algorithm & Winnow algorithm adjust training[1]
 
 ## Usage ##
 
@@ -40,68 +43,45 @@ Must give the file dictionary like this
 
 ```
 .
-├── extra
-├── neg
-├── output
+├── extra		// support data, like dictionary, ban list, ...
+├── neg 		// negative processed data 
+├── output 	// program output
 │   ├── neg
-│   ├── pos
-│   └── unknown
-├── pos
+│   └── pos
+├── pos 		// positive processed data
 └── user_test
-    ├── neg
-    ├── pos
-    └── unknown
+    ├── neg  // you think the data maybe negative data.
+    └── pos
 ```
 
-Good Luck.
+If you want to test unknown data, put them in `user_test/neg` or `user_test/pos` folder. Program will generate result of classifier to `output/neg` or `output/pos` folder. Good Luck.
+
+There is a example output in runtime.
 
 ```
 ## Configuration ##
 
-* Ngram 4
-* topNgram 10000
+* Ngram 5
+* topNgram 40000
 
 ## Work ##
 
-* positive sieve 4-grams building ...
-* negative sieve 4-grams building ...
+* positive sieve 5-grams building ...
+* negative sieve 5-grams building ...
 
-* positive #ngram 810482
-* negative #ngram 725426
+* positive #ngram 728638
+* negative #ngram 666344
+
+## Simple Decision ##
+
+
+complete |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>|
+
 
 ## Language Model ##
 
 * Language Model prepare ...
 * Language Model self-testing ...
-* Language Model testing ...
-
-Table `Language Model Class Positive`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            122|            128|
-|       Truth yes|             16|            234|
-
-P  0.936000 %, R  0.646409 %, F1  0.764706 %
-
-Table `Language Model Class Negative`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            234|             16|
-|       Truth yes|            128|            122|
-
-P  0.488000 %, R  0.884058 %, F1  0.628866 %
-
-Table `Language Model Final`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            356|            144|
-|       Truth yes|            144|            356|
-
-P  0.712000 %, R  0.712000 %, F1  0.712000 %
-
 
 ## Winnow Algorithm ##
 
@@ -110,108 +90,20 @@ P  0.712000 %, R  0.712000 %, F1  0.712000 %
 complete |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>|
 
 * Winnow algorithm self-testing ...
-* Winnow algorithm testing ...
-
-Table `Winnow Class Positive`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            160|             90|
-|       Truth yes|             66|            184|
-
-P  0.736000 %, R  0.671533 %, F1  0.702290 %
-
-Table `Winnow Class Negative`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            184|             66|
-|       Truth yes|             90|            160|
-
-P  0.640000 %, R  0.707965 %, F1  0.672269 %
-
-Table `Winnow Final`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            344|            156|
-|       Truth yes|            156|            344|
-
-P  0.688000 %, R  0.688000 %, F1  0.688000 %
-
 ## Passive-Aggressive Algorithm ##
 
-* Passive-Aggressive algorithm top-10000 prepare ...
+* Passive-Aggressive algorithm top-40000 prepare ...
 
 complete |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>|
 
 * Passive-Aggressive algorithm self-testing ...
-* Passive-Aggressive algorithm testing ...
-
-Table `Passive-Aggressive Class Positive`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            196|             54|
-|       Truth yes|             28|            222|
-
-P  0.888000 %, R  0.804348 %, F1  0.844106 %
-
-Table `Passive-Aggressive Class Negative`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            222|             28|
-|       Truth yes|             54|            196|
-
-P  0.784000 %, R  0.875000 %, F1  0.827004 %
-
-Table `Passive-Aggressive Final`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            418|             82|
-|       Truth yes|             82|            418|
-
-P  0.836000 %, R  0.836000 %, F1  0.836000 %
-
 
 ## Adaboost ##
 
 * Prepare Meeting Machine ...
 
 
-complete |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>|
-
-* Meeting prepare ...
-* Meeting top-10000 testing ...
-
-Table `Adaboost Class Positive`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            199|             51|
-|       Truth yes|             21|            229|
-
-P  0.916000 %, R  0.817857 %, F1  0.864151 %
-
-Table `Adaboost Class Negative`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            229|             21|
-|       Truth yes|             51|            199|
-
-P  0.796000 %, R  0.904545 %, F1  0.846809 %
-
-Table `Adaboost Final`
-
-|Truth\Classifier|  Classifier no| Classifier yes|
-|----------------|---------------|---------------|
-|        Truth no|            428|             72|
-|       Truth yes|             72|            428|
-
-P  0.856000 %, R  0.856000 %, F1  0.856000 %
+complete |>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>|
 
 
 # User Require #
@@ -220,111 +112,137 @@ Table `Language Model Class Positive`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|             15|             11|
-|       Truth yes|              0|              1|
+|        Truth no|            119|             81|
+|       Truth yes|              9|            191|
 
-P  1.000000 %, R  0.083333 %, F1  0.153846 %
+P  95.50 %, R  70.22 %, F1  80.93 %
 
 Table `Language Model Class Negative`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|              1|              0|
-|       Truth yes|             11|             15|
+|        Truth no|            191|              9|
+|       Truth yes|             81|            119|
 
-P  0.576923 %, R  1.000000 %, F1  0.731707 %
+P  59.50 %, R  92.97 %, F1  72.56 %
 
 Table `Language Model Final`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|             16|             11|
-|       Truth yes|             11|             16|
+|        Truth no|            310|             90|
+|       Truth yes|             90|            310|
 
-P  0.592593 %, R  0.592593 %, F1  0.592593 %
+P  77.50 %, R  77.50 %, F1  77.50 %
 
 Table `Winnow Class Positive`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|             25|              0|
-|       Truth yes|              1|              0|
+|        Truth no|            151|             49|
+|       Truth yes|             68|            132|
 
-P  0.000000 %, R  NaN %, F1  NaN %
+P  66.00 %, R  72.93 %, F1  69.29 %
 
 Table `Winnow Class Negative`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|              0|              1|
-|       Truth yes|              0|             25|
+|        Truth no|            132|             68|
+|       Truth yes|             49|            151|
 
-P  1.000000 %, R  0.961538 %, F1  0.980392 %
+P  75.50 %, R  68.95 %, F1  72.08 %
 
 Table `Winnow Final`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|             25|              1|
-|       Truth yes|              1|             25|
+|        Truth no|            283|            117|
+|       Truth yes|            117|            283|
 
-P  0.961538 %, R  0.961538 %, F1  0.961538 %
+P  70.75 %, R  70.75 %, F1  70.75 %
 
 Table `Passive-Aggressive Class Positive`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|             13|             12|
-|       Truth yes|              1|              0|
+|        Truth no|            167|             33|
+|       Truth yes|             33|            167|
 
-P  0.000000 %, R  0.000000 %, F1  NaN %
+P  83.50 %, R  83.50 %, F1  83.50 %
 
 Table `Passive-Aggressive Class Negative`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|              0|              1|
-|       Truth yes|             12|             13|
+|        Truth no|            167|             33|
+|       Truth yes|             33|            167|
 
-P  0.520000 %, R  0.928571 %, F1  0.666667 %
+P  83.50 %, R  83.50 %, F1  83.50 %
 
 Table `Passive-Aggressive Final`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|             13|             13|
-|       Truth yes|             13|             13|
+|        Truth no|            334|             66|
+|       Truth yes|             66|            334|
 
-P  0.500000 %, R  0.500000 %, F1  0.500000 %
+P  83.50 %, R  83.50 %, F1  83.50 %
+
+Table `Simple Decision Class Positive`
+
+|Truth\Classifier|  Classifier no| Classifier yes|
+|----------------|---------------|---------------|
+|        Truth no|            135|             65|
+|       Truth yes|             12|            188|
+
+P  94.00 %, R  74.31 %, F1  83.00 %
+
+Table `Simple Decision Class Negative`
+
+|Truth\Classifier|  Classifier no| Classifier yes|
+|----------------|---------------|---------------|
+|        Truth no|            188|             12|
+|       Truth yes|             65|            135|
+
+P  67.50 %, R  91.84 %, F1  77.81 %
+
+Table `Simple Decision Final`
+
+|Truth\Classifier|  Classifier no| Classifier yes|
+|----------------|---------------|---------------|
+|        Truth no|            323|             77|
+|       Truth yes|             77|            323|
+
+P  80.75 %, R  80.75 %, F1  80.75 %
 
 * Meeting prepare ...
-* Meeting top-10000 testing ...
+* Meeting top-40000 testing ...
 
 Table `Adaboost Class Positive`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|             24|              1|
-|       Truth yes|              1|              0|
+|        Truth no|            174|             26|
+|       Truth yes|             22|            178|
 
-P  0.000000 %, R  0.000000 %, F1  NaN %
+P  89.00 %, R  87.25 %, F1  88.12 %
 
 Table `Adaboost Class Negative`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|              0|              1|
-|       Truth yes|              1|             24|
+|        Truth no|            178|             22|
+|       Truth yes|             26|            174|
 
-P  0.960000 %, R  0.960000 %, F1  0.960000 %
+P  87.00 %, R  88.78 %, F1  87.88 %
 
 Table `Adaboost Final`
 
 |Truth\Classifier|  Classifier no| Classifier yes|
 |----------------|---------------|---------------|
-|        Truth no|             24|              2|
-|       Truth yes|              2|             24|
+|        Truth no|            352|             48|
+|       Truth yes|             48|            352|
 
-P  0.923077 %, R  0.923077 %, F1  0.923077 %
-
+P  88.00 %, R  88.00 %, F1  88.00 %
 ```

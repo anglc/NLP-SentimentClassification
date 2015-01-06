@@ -243,20 +243,21 @@ public class Main {
 			predict[2] = PAmachine.classify(viewsVec);
 			predict[3] = lv1DecisionTree.classify(posTrainOccVec.get(i));
 
-//			predictWeight[0] = LMmachine.strongClassify(views);
+			// predictWeight[0] = LMmachine.strongClassify(views);
 			predictWeight[1] = MLmachine.strongClassify(viewsVec);
 			predictWeight[2] = PAmachine.strongClassify(viewsVec);
-			predictWeight[3] = lv1DecisionTree.strongClassify(posTrainOccVec.get(i));
+			predictWeight[3] = lv1DecisionTree.strongClassify(posTrainOccVec
+					.get(i));
 			predictWeight[0] = 1;
-			predictWeight[3] = 0;
-			
-//			voteArr[0] = LMmachine.strongClassify(views, "pos");
-//			voteArr[4] = -LMmachine.strongClassify(views, "neg");
+			predictWeight[3] = 1;
+
+			// voteArr[0] = LMmachine.strongClassify(views, "pos");
+			// voteArr[4] = -LMmachine.strongClassify(views, "neg");
 			for (int j = 0; j < 4; j++) {
 				if (predict[j])
 					voteArr[j] = predictWeight[j];
 				else
-					voteArr[j] = -predictWeight[j];
+					voteArr[4 + j] = -predictWeight[j];
 			}
 			for (int j = 0; j < 8; j++)
 				voteVec.put(j, voteArr[j]);
@@ -278,17 +279,18 @@ public class Main {
 			predictWeight[0] = LMmachine.strongClassify(views);
 			predictWeight[1] = MLmachine.strongClassify(viewsVec);
 			predictWeight[2] = PAmachine.strongClassify(viewsVec);
-			predictWeight[3] = lv1DecisionTree.strongClassify(negTrainOccVec.get(i));
+			predictWeight[3] = lv1DecisionTree.strongClassify(negTrainOccVec
+					.get(i));
 			predictWeight[0] = 1;
-			predictWeight[3] = 0;
-			
-//			voteArr[0] = LMmachine.strongClassify(views, "pos");
-//			voteArr[4] = -LMmachine.strongClassify(views, "neg");
+			predictWeight[3] = 1;
+
+			// voteArr[0] = LMmachine.strongClassify(views, "pos");
+			// voteArr[4] = -LMmachine.strongClassify(views, "neg");
 			for (int j = 0; j < 4; j++) {
 				if (predict[j])
 					voteArr[j] = predictWeight[j];
 				else
-					voteArr[j] = -predictWeight[j];
+					voteArr[4 + j] = -predictWeight[j];
 			}
 			for (int j = 0; j < 8; j++)
 				voteVec.put(j, voteArr[j]);
