@@ -88,6 +88,21 @@ public class ModelUtilities {
 		return ret;
 	}
 
+	public static TreeMap<nGram, Integer> getNgramOcc(String s, int n,
+			TreeMap<nGram, Integer> mixPickPosMap) {
+		TreeMap<nGram, Integer> ret = new TreeMap<nGram, Integer>();
+		ArrayList<nGram> t = transformNgram(s, n);
+		for (nGram e : t) {
+			if (mixPickPosMap.containsKey(e)) {
+				int count = 1;
+				if (ret.containsKey(e))
+					count = ret.get(e) + 1;
+				ret.put(e, count);
+			}
+		}
+		return ret;
+	}
+
 	public static double[] getCharacteristicVector(String s, int n,
 			ArrayList<nGram> vec) {
 		ArrayList<nGram> t = transformNgram(s, n);

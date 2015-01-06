@@ -18,11 +18,12 @@ public class OutputClassifier {
 	public static void testMeetingInterview(DecisionStump lv1DecisionTree,
 			PassiveAggressive meetingMachine, LanguageModel LMmachine,
 			WinnowMachine MLmachine, PassiveAggressive PAmachine, int Ngram,
-			int topNgram, String[] posTest, String[] negTest,
-			ArrayList<TreeMap<Integer, Double>> posVec2,
+			int topNgram, ArrayList<TreeMap<Integer, Double>> posVec2,
 			ArrayList<TreeMap<Integer, Double>> negVec2,
 			ArrayList<TreeMap<Integer, Double>> posOccVec2,
-			ArrayList<TreeMap<Integer, Double>> negOccVec2) {
+			ArrayList<TreeMap<Integer, Double>> negOccVec2,
+			ArrayList<TreeMap<nGram, Integer>> posOccGramVec2,
+			ArrayList<TreeMap<nGram, Integer>> negOccGramVec2) {
 		ArrayList<TreeMap<Integer, Double>> posVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<TreeMap<Integer, Double>> negVec = new ArrayList<TreeMap<Integer, Double>>();
 
@@ -32,21 +33,22 @@ public class OutputClassifier {
 		int posIdx = 0, negIdx = 0;
 		boolean[] predict = new boolean[4];
 		double[] predictWeight = new double[4];
-
-		while (posIdx < posTest.length || negIdx < negTest.length) {
+		
+		int posSize = posVec2.size(), negSize = negVec2.size();
+		while (posIdx < posSize || negIdx < negSize) {
 			boolean correct = false;
-			String views = null;
+			TreeMap<nGram, Integer> views = null;
 			TreeMap<Integer, Double> viewsVec = null, voteVec = new TreeMap<Integer, Double>(), viewsOcc = null;
 			double[] voteArr = new double[8];
-			if ((Math.random() < 0.5 && posIdx < posTest.length)
-					|| (negIdx >= negTest.length)) {
-				views = posTest[posIdx];
+			if ((Math.random() < 0.5 && posIdx < posSize)
+					|| (negIdx >= negSize)) {
+				views = posOccGramVec2.get(posIdx);
 				viewsVec = posVec2.get(posIdx);
 				viewsOcc = posOccVec2.get(posIdx);
 				posIdx++;
 				correct = true;
-			} else if (negIdx < negTest.length) {
-				views = negTest[negIdx];
+			} else if (negIdx < negSize) {
+				views = negOccGramVec2.get(negIdx);
 				viewsVec = negVec2.get(negIdx);
 				viewsOcc = negOccVec2.get(negIdx);
 				negIdx++;
@@ -64,9 +66,9 @@ public class OutputClassifier {
 			predictWeight[3] = lv1DecisionTree.strongClassify(viewsOcc);
 			predictWeight[0] = 1;
 			predictWeight[3] = 1;
-			
-//			voteArr[0] = LMmachine.strongClassify(views, "pos");
-//			voteArr[4] = -LMmachine.strongClassify(views, "neg");
+
+			// voteArr[0] = LMmachine.strongClassify(views, "pos");
+			// voteArr[4] = -LMmachine.strongClassify(views, "neg");
 			for (int j = 0; j < 4; j++) {
 				if (predict[j])
 					voteArr[j] = predictWeight[j];
@@ -144,7 +146,9 @@ public class OutputClassifier {
 	}
 
 	public static void testLMClassifier(ArrayList<nGram> mixPick,
-			LanguageModel LMmachine, String[] posTest, String[] negTest) {
+			LanguageModel LMmachine,
+			ArrayList<TreeMap<nGram, Integer>> posOccGramVec2,
+			ArrayList<TreeMap<nGram, Integer>> negOccGramVec2) {
 		ArrayList<Integer> posOutput, negOutput, unkOutput;
 		int[][] tablePos, tableNeg, tableAll;
 
@@ -155,7 +159,7 @@ public class OutputClassifier {
 		tablePos = new int[2][2];
 		tableNeg = new int[2][2];
 		tableAll = new int[2][2];
-		for (String pos : posTest) {
+		for (TreeMap<nGram, Integer> pos : posOccGramVec2) {
 			if (LMmachine.classify(pos)) {
 				tableNeg[0][0]++;
 				tablePos[1][1]++;
@@ -166,7 +170,7 @@ public class OutputClassifier {
 				posOutput.add(0);
 			}
 		}
-		for (String neg : negTest) {
+		for (TreeMap<nGram, Integer> neg : negOccGramVec2) {
 			if (LMmachine.classify(neg)) {
 				tableNeg[1][0]++;
 				tablePos[0][1]++;
