@@ -39,7 +39,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		// Dashboard demo = new Dashboard();
-		work(5, 20000, "training_set");
+		work(3, 50000, "training_set");
 	}
 
 	public static void work(int Ngram, int topNgram, String trainingPath) {
@@ -135,12 +135,12 @@ public class Main {
 				posTrainOccVec, negTrainOccVec, posTrainOccGramVec,
 				negTrainOccGramVec);
 
-		lv1DecisionTree = testSimpleDecision();
-		LMmachine = testLanguageModel(Ngram, topNgram, posTrainOccGramVec,
+		lv1DecisionTree = createSimpleDecision();
+		LMmachine = createLanguageModel(Ngram, topNgram, posTrainOccGramVec,
 				negTrainOccGramVec);
-		MLmachine = testWinnow(topNgram);
-		PAmachine = testPassiveAggressive(topNgram);
-		meetingMachine = prepareMeeting(LMmachine, MLmachine, PAmachine,
+		MLmachine = createWinnow(topNgram);
+		PAmachine = createPassiveAggressive(topNgram);
+		meetingMachine = createMeeting(LMmachine, MLmachine, PAmachine,
 				lv1DecisionTree, Ngram, topNgram, mixPick, posTrain, negTrain);
 	}
 
@@ -198,7 +198,7 @@ public class Main {
 		}
 	}
 
-	public static DecisionStump testSimpleDecision() {
+	public static DecisionStump createSimpleDecision() {
 		System.out.println("\n## Simple Decision ##\n");
 		DecisionStump lv1DecisionTree = new DecisionStump(3);
 		ArrayList<TreeMap<Integer, Double>> votePosVec = posTrainOccVec;
@@ -233,7 +233,7 @@ public class Main {
 		return lv1DecisionTree;
 	}
 
-	public static PassiveAggressive prepareMeeting(LanguageModel LMmachine,
+	public static PassiveAggressive createMeeting(LanguageModel LMmachine,
 			WinnowMachine MLmachine, PassiveAggressive PAmachine,
 			DecisionStump lv1DecisionTree, int Ngram, int topNgram,
 			ArrayList<nGram> mixPick, String[] posTrain, String[] negTrain) {
@@ -333,7 +333,7 @@ public class Main {
 		return meetingMachine;
 	}
 
-	public static LanguageModel testLanguageModel(int Ngram, int topNgram,
+	public static LanguageModel createLanguageModel(int Ngram, int topNgram,
 			ArrayList<TreeMap<nGram, Integer>> posTrainOccGramVec,
 			ArrayList<TreeMap<nGram, Integer>> negTrainOccGramVec) {
 		System.out.println("\n## Language Model ##\n");
@@ -354,7 +354,7 @@ public class Main {
 		return LMmachine;
 	}
 
-	public static WinnowMachine testWinnow(int topNgram) {
+	public static WinnowMachine createWinnow(int topNgram) {
 		System.out.println("\n## Winnow Algorithm ##\n");
 		System.out.printf("* Winnow algorithm prepare ...\n");
 		WinnowMachine MLmachine = new WinnowMachine(topNgram);
@@ -392,7 +392,7 @@ public class Main {
 		return MLmachine;
 	}
 
-	public static PassiveAggressive testPassiveAggressive(int topNgram) {
+	public static PassiveAggressive createPassiveAggressive(int topNgram) {
 		System.out.println("## Passive-Aggressive Algorithm ##\n");
 		System.out
 				.printf("* Passive-Aggressive algorithm top-%d prepare ...\n",

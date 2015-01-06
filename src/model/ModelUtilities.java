@@ -76,10 +76,10 @@ public class ModelUtilities {
 				if (sieveToken(token))
 					tokens.add(token);
 				else {
-					if (tokens.size() > 0) {
-						ret.addAll(transfromNgramPhrase(tokens, n));
-						tokens.clear();
-					}
+					// if (tokens.size() > 0) {
+					// ret.addAll(transfromNgramPhrase(tokens, n));
+					// tokens.clear();
+					// }
 				}
 			}
 			if (tokens.size() > 0)
