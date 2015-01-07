@@ -20,11 +20,11 @@ public class nGram implements Comparable<Object> {
 	}
 
 	public void set(int[] i) {
-		iWord = i;
+		iWord = i.clone();
 	}
 
 	public void set(String[] s) {
-		sWord = s;
+		sWord = s.clone();
 	}
 
 	@Override

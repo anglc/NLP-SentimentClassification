@@ -27,10 +27,20 @@ public class ModelUtilities {
 	}
 
 	public static String sieveString(String s) {
-		String[] regex = { "\\(", "\\)", "\"", "!" };
+		String[] regex = { "\\(", "\\)", "\"", "!", "-", "\\d+", "_", "/", "`",
+				"=", "\\]", "\\[", ">|<" };
 		for (String e : regex)
-			s = s.replaceAll(e, "");
+			s = s.replaceAll(e, " ");
+		s = s.replaceAll("\\+", "'");
+		s = s.replaceAll("can't", " can not");
 		s = s.replaceAll("n't", " not");
+		s = s.replaceAll("'re", " are");
+		s = s.replaceAll("'s", " is");
+		s = s.replaceAll("'m", " am");
+		s = s.replaceAll("'ve", " have");
+		s = s.replaceAll("'ll", " will");
+		s = s.replaceAll("&", " and ");
+		s = s.replaceAll("\\+", " ");
 		return s;
 	}
 
@@ -40,6 +50,37 @@ public class ModelUtilities {
 		if (ignoreToken.contains(s))
 			return false;
 		return true;
+	}
+
+	public static String removeDuplicateCharToken(String s) {
+		if (s.length() == 0)
+			return s;
+		String ret = "" + s.charAt(0);
+		char prev = s.charAt(0);
+		for (int i = 1; i < s.length(); i++) {
+			if (s.charAt(i) == prev)
+				continue;
+			ret += s.charAt(i);
+			prev = s.charAt(i);
+		}
+		return ret;
+	}
+
+	public static String replaceSynonym(String s) {
+		s = s.replaceAll("'", "");
+		if (s.equals("are") || s.equals("is") || s.equals("was")
+				|| s.equals("were") || s.equals("am"))
+			return "be";
+		if (s.equals("no"))
+			return "not";
+		if (s.equals("u"))
+			return "you";
+		if (s.length() == 1)
+			return "";
+		if (renameMap.containsKey(removeDuplicateCharToken(s)))
+			return removeDuplicateCharToken(s);
+		// uuuuuuuugggggggggglllllllllllyyyyyyy
+		return s;
 	}
 
 	public static ArrayList<nGram> transfromNgramPhrase(
@@ -56,7 +97,7 @@ public class ModelUtilities {
 				for (int j = 0; j < k && i + j < tokens.size(); j++)
 					a[j] = iTokens[i + j];
 				nGram e = new nGram(a);
-				e.dag();
+//				e.dag();
 				ret.add(e);
 			}
 		}
@@ -65,7 +106,7 @@ public class ModelUtilities {
 
 	public static ArrayList<nGram> transformNgram(String s, int n) {
 		ArrayList<nGram> ret = new ArrayList<nGram>();
-		String[] stmt = s.split("\\.|,|:|;|\\?|!");
+		String[] stmt = s.split("\\.|,|:|;|\\?|!|\\*");
 		for (String ss : stmt) {
 			ss = sieveString(ss);
 			ArrayList<String> tokens = new ArrayList<String>();
@@ -73,7 +114,8 @@ public class ModelUtilities {
 			while (st.hasMoreTokens()) {
 				String token = st.nextToken();
 				token = token.toLowerCase();
-				if (sieveToken(token))
+				token = replaceSynonym(token);
+				if (sieveToken(token) && token.length() > 0)
 					tokens.add(token);
 				else {
 					// if (tokens.size() > 0) {

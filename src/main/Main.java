@@ -39,7 +39,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		// Dashboard demo = new Dashboard();
-		work(3, 50000, "training_set");
+		work(3, 30000, "training_set");
 	}
 
 	public static void work(int Ngram, int topNgram, String trainingPath) {
@@ -110,12 +110,23 @@ public class Main {
 		System.out.printf("* positive #ngram %d\n", posSieve.ngramCount);
 		System.out.printf("* negative #ngram %d\n", negSieve.ngramCount);
 
-		posPick = posSieve.getBestNgram(topNgram);
-		negPick = negSieve.getBestNgram(topNgram);
+		posPick = posSieve.getBestNgram(topNgram / 2);
+		negPick = negSieve.getBestNgram(topNgram / 2);
 		posPickSet = new TreeSet<nGram>();
 		negPickSet = new TreeSet<nGram>();
 		mixPick = ModelUtilities.mergePick(posPick, negPick, topNgram,
 				posPickSet, negPickSet);
+
+		for (int i = 0; i < 1000 && i < mixPick.size(); i++) {
+			nGram e = mixPick.get(i);
+			System.out.printf("Score %f (", e.score);
+			for (int j = 0; j < e.iWord.length; j++) {
+				System.out
+						.printf("%s ", ModelUtilities.getWordName(e.iWord[j]));
+			}
+			System.out.println(")");
+		}
+		// System.exit(0);
 		mixPickSet = new TreeSet<nGram>();
 		mixPickPosMap = new TreeMap<nGram, Integer>();
 		for (int i = 0; i < mixPick.size(); i++) {
@@ -358,7 +369,7 @@ public class Main {
 		System.out.println("\n## Winnow Algorithm ##\n");
 		System.out.printf("* Winnow algorithm prepare ...\n");
 		WinnowMachine MLmachine = new WinnowMachine(topNgram);
-		int ITLIMIT = 40;
+		int ITLIMIT = 50;
 
 		System.out.printf("\ncomplete |");
 		for (int it = 0; it < ITLIMIT; it++) {
@@ -398,7 +409,7 @@ public class Main {
 				.printf("* Passive-Aggressive algorithm top-%d prepare ...\n",
 						topNgram);
 		PassiveAggressive PAmachine = new PassiveAggressive(topNgram);
-		int ITLIMIT = 40;
+		int ITLIMIT = 50;
 
 		System.out.printf("\ncomplete |");
 		for (int it = 0; it < ITLIMIT; it++) {

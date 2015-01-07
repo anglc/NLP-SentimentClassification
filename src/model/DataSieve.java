@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class DataSieve {
+	public final static double[] ngramBonus = {0, 1, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07};
 	private int n;
 	private String[] views, otherViews;
 	private TreeMap<nGram, Integer> viewsMap, otherMap; // total appear count
@@ -98,7 +99,7 @@ public class DataSieve {
 		SubGramSet subNgram = new SubGramSet();
 		pickWeight[0] = k;
 		for (int i = 0; i < this.n - 1; i++) {
-			int part = pickWeight[i] * 4 / 5;
+			int part = pickWeight[i] * 7 / 10;
 			pickWeight[i + 1] = pickWeight[i] - part;
 			pickWeight[i] = part;
 			if (pickWeight[i + 1] < 10)
@@ -152,6 +153,8 @@ public class DataSieve {
 			nGram e = entry.getKey();
 			double score = entry.getValue() * Math.pow(A * D - C * B, 2)
 					/ (A + C) / (B + D) / (A + B) / (C + D);
+			score *= ngramBonus[e.getNonTerminal()];
+			score *= ModelUtilities.scoreNgram(e);
 			e.score = score;
 			xsquare.add(e);
 		}
