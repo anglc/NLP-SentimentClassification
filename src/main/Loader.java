@@ -12,9 +12,9 @@ import model.ModelUtilities;
 public class Loader {
 	private File posFolder, negFolder;
 	private File testPosFolder, testNegFolder, testUnknownFolder;
-	private File wordFile, stopWordsFile;
+	private File wordFile, stopWordsFile, notWordsFile;
 	public TreeMap<String, Integer> wordWeight;
-	public TreeSet<String> stopWords;
+	public TreeSet<String> stopWords, notWords;
 	public ArrayList<String> posViews, negViews;
 	public ArrayList<String> testPos, testNeg, testUnknown;
 	public ArrayList<String> testPosName, testNegName, testUnknownName;
@@ -50,10 +50,16 @@ public class Loader {
 		wordWeight = new TreeMap<String, Integer>();
 		storeWordWeight(wordFile);
 		// = { "the", "are", "is", "i", "it", "he", "she", "-", "a", "an" }
-		stopWordsFile = new File(path + "/extra/stopwords.txt");
+		stopWordsFile = new File(path
+				+ "/extra/english.stopnegation-removed.txt");
 		stopWords = new TreeSet<String>();
-		storeStopWords(stopWordsFile);
+		storeWords(stopWordsFile, stopWords);
 		ModelUtilities.ignoreToken = stopWords;
+
+		notWordsFile = new File(path + "/extra/negation.txt");
+		notWords = new TreeSet<String>();
+		storeWords(notWordsFile, notWords);
+		ModelUtilities.notToken = notWords;
 	}
 
 	public void storeWordWeight(File f) {
@@ -78,18 +84,15 @@ public class Loader {
 		}
 	}
 
-	public void storeStopWords(File f) {
+	public void storeWords(File f, TreeSet<String> words) {
 		if (f != null && f.getName().charAt(0) == '.')
 			return;
 		try {
 			BufferedReader fin = new BufferedReader(new FileReader(f));
 			String line;
 			while ((line = fin.readLine()) != null) {
-				String[] s = line.split("\\s+");
-				if (s.length != 1)
-					continue;
-				String word = s[0];
-				stopWords.add(word);
+				line = line.trim();
+				words.add(line);
 			}
 			fin.close();
 		} catch (Exception e) {

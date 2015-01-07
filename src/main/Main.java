@@ -39,7 +39,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		// Dashboard demo = new Dashboard();
-		work(3, 30000, "training_set");
+		work(3, 20000, "training_set");
 	}
 
 	public static void work(int Ngram, int topNgram, String trainingPath) {

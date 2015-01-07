@@ -32,6 +32,7 @@ public class ModelUtilities {
 		for (String e : regex)
 			s = s.replaceAll(e, " ");
 		s = s.replaceAll("\\+", "'");
+		s = s.replaceAll("cannot", " can not");
 		s = s.replaceAll("can't", " can not");
 		s = s.replaceAll("n't", " not");
 		s = s.replaceAll("'re", " are");
@@ -45,6 +46,7 @@ public class ModelUtilities {
 	}
 
 	public static TreeSet<String> ignoreToken = new TreeSet<String>();
+	public static TreeSet<String> notToken = new TreeSet<String>();
 
 	public static boolean sieveToken(String s) {
 		if (ignoreToken.contains(s))
@@ -71,7 +73,9 @@ public class ModelUtilities {
 		if (s.equals("are") || s.equals("is") || s.equals("was")
 				|| s.equals("were") || s.equals("am"))
 			return "be";
-		if (s.equals("no"))
+		// if (s.equals("no") || s.equals("never") || s.equals("but")||
+		// s.equals("neither"))
+		if (notToken.contains(s))
 			return "not";
 		if (s.equals("u"))
 			return "you";
@@ -79,7 +83,6 @@ public class ModelUtilities {
 			return "";
 		if (renameMap.containsKey(removeDuplicateCharToken(s)))
 			return removeDuplicateCharToken(s);
-		// uuuuuuuugggggggggglllllllllllyyyyyyy
 		return s;
 	}
 
@@ -97,7 +100,7 @@ public class ModelUtilities {
 				for (int j = 0; j < k && i + j < tokens.size(); j++)
 					a[j] = iTokens[i + j];
 				nGram e = new nGram(a);
-//				e.dag();
+				// e.dag();
 				ret.add(e);
 			}
 		}
@@ -163,15 +166,21 @@ public class ModelUtilities {
 			String s, int n, TreeMap<nGram, Integer> mixPickPosMap) {
 		ArrayList<nGram> t = transformNgram(s, n);
 		TreeMap<nGram, Integer> tMap = new TreeMap<nGram, Integer>();
+		TreeMap<nGram, Integer> tCountMap = new TreeMap<nGram, Integer>();
 		for (nGram e : t) {
 			int count = scoreNgram(e);
 			tMap.put(e, count);
+			count = 1;
+			if (tCountMap.containsKey(e))
+				count = tCountMap.get(e) + 1;
+			tCountMap.put(e, count);
 		}
 		TreeMap<Integer, Double> ret = new TreeMap<Integer, Double>();
 		for (Map.Entry<nGram, Integer> e : tMap.entrySet()) {
 			if (mixPickPosMap.containsKey(e.getKey())) {
 				double v = e.getValue();
-				ret.put(mixPickPosMap.get(e.getKey()), v);
+				ret.put(mixPickPosMap.get(e.getKey()),
+						v + Math.sqrt(tCountMap.get(e.getKey())));
 			}
 		}
 		return ret;
