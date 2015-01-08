@@ -1,8 +1,12 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
+
+import main.Article;
+import main.Main;
 
 public class PassiveAggressive implements Classifier {
 	public double[] w;
@@ -105,5 +109,85 @@ public class PassiveAggressive implements Classifier {
 			selfMin = Math.min(selfMin, pc);
 			selfMax = Math.max(selfMax, pc);
 		}
+	}
+
+	@Override
+	public void training(ArrayList<Article> posTrainArticles,
+			ArrayList<Article> negTrainArticles, int kind) {
+		ArrayList<Article> articles = new ArrayList<Article>();
+		articles.addAll(posTrainArticles);
+		articles.addAll(negTrainArticles);
+
+		Main.stdout(String.format("\ncomplete |"), 0);
+
+		for (int it = 0; it < Main.ITLIMIT; it++) {
+			if (it % (Main.ITLIMIT / 10) == 0)
+				Main.stdout(String.format(">"), 0);
+			Collections.shuffle(articles);
+			for (int i = 0; i < articles.size(); i++) {
+				if (articles.get(i).polarity > 0) {
+					this.add(articles.get(i).vec, 1);
+				} else {
+					this.add(articles.get(i).vec, -1);
+				}
+			}
+		}
+		Main.stdout(String.format("|\n\n"), 0);
+		Main.stdout(String.format("\ncomplete |"), 0);
+		for (int it = 0; it < Main.ITLIMIT; it++) {
+			if (it % (Main.ITLIMIT / 10) == 0)
+				Main.stdout(String.format(">"), 0);
+			Collections.shuffle(articles);
+			for (int i = 0; i < articles.size(); i++) {
+				if (articles.get(i).polarity > 0) {
+					if (kind == 0)
+						this.add(articles.get(i).vec, 1);
+					else if (kind == 1)
+						this.add(articles.get(i).occVec, 1);
+				} else {
+					if (kind == 0)
+						this.add(articles.get(i).vec, -1);
+					else if (kind == 1)
+						this.add(articles.get(i).occVec, -1);
+				}
+			}
+		}
+		Main.stdout(String.format("|\n\n"), 0);
+
+		this.initSelfTraining();
+		for (int i = 0; i < articles.size(); i++) {
+			if (articles.get(i).polarity > 0) {
+				if (kind == 0)
+					this.selfTraining(articles.get(i).vec, 1);
+				else if (kind == 1)
+					this.selfTraining(articles.get(i).occVec, 1);
+			} else {
+				if (kind == 0)
+					this.selfTraining(articles.get(i).vec, -1);
+				else if (kind == 1)
+					this.selfTraining(articles.get(i).occVec, -1);
+			}
+		}
+	}
+
+	public void training(ArrayList<TreeMap<Integer, Double>> votePosVec,
+			ArrayList<TreeMap<Integer, Double>> voteNegVec) {
+		Main.stdout(String.format("\ncomplete |"), 0);
+		int ratio = 10;
+		for (int it = 0; it < Main.ITLIMIT * ratio; it++) {
+			if (it % (Main.ITLIMIT * ratio / 10) == 0)
+				Main.stdout(String.format(">"), 0);
+			int posIdx = 0, negIdx = 0;
+			while (posIdx < votePosVec.size() || negIdx < voteNegVec.size()) {
+				if (Math.random() < 0.5 && posIdx < votePosVec.size()) {
+					this.add(votePosVec.get(posIdx), 1);
+					posIdx++;
+				} else if (negIdx < voteNegVec.size()) {
+					this.add(voteNegVec.get(negIdx), -1);
+					negIdx++;
+				}
+			}
+		}
+		Main.stdout(String.format("|\n\n"), 0);
 	}
 }

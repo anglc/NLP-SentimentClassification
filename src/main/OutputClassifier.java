@@ -15,18 +15,24 @@ import model.WinnowMachine;
 import model.nGram;
 
 public class OutputClassifier {
-	public static void testMeetingInterview(DecisionStump lv1DecisionTree,
-			PassiveAggressive meetingMachine, LanguageModel LMmachine,
-			WinnowMachine[] MLmachine, PassiveAggressive[] PAmachine,
-			int Ngram, int topNgram, ArrayList<Article> posTrainArticles2,
+	public static int stdout_status = 1;
+	public static int store_status = 0;
+
+	public static void stdout(String s, int priority) {
+		if (stdout_status == 1 && priority > 0)
+			System.out.print(s);
+	}
+
+	public static MeasureInfo testMeetingInterview(
+			DecisionStump lv1DecisionTree, PassiveAggressive meetingMachine,
+			LanguageModel LMmachine, WinnowMachine[] MLmachine,
+			PassiveAggressive[] PAmachine, int Ngram, int topNgram,
+			ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
 		int vectorSize = (2 + MLmachine.length + PAmachine.length) * 2;
 		int base1 = 2, base2 = 2 + MLmachine.length;
 		ArrayList<TreeMap<Integer, Double>> posVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<TreeMap<Integer, Double>> negVec = new ArrayList<TreeMap<Integer, Double>>();
-
-		System.out.printf("* Meeting prepare ...\n");
-		System.out.printf("* Meeting top-%d testing ...\n\n", topNgram);
 
 		int n = posTrainArticles2.size();
 		int m = negTrainArticles2.size();
@@ -47,12 +53,12 @@ public class OutputClassifier {
 				voteVec.put(0 * 2 + 1, predictW);
 
 			predict = lv1DecisionTree.classify(article.occVec);
-			predictW = 1;
+			predictW = 0;
 			if (predict)
 				voteVec.put(1 * 2, predictW);
 			else
 				voteVec.put(1 * 2 + 1, predictW);
-			
+
 			for (int j = 0; j < MLmachine.length; j++) {
 				predict = MLmachine[j].classify(article.vec);
 				predictW = MLmachine[j].strongClassify(article.vec);
@@ -61,7 +67,7 @@ public class OutputClassifier {
 				else
 					voteVec.put((j + base1) * 2 + 1, predictW);
 			}
-			
+
 			for (int j = 0; j < PAmachine.length; j++) {
 				predict = PAmachine[j].classify(article.vec);
 				predictW = PAmachine[j].strongClassify(article.vec);
@@ -78,11 +84,10 @@ public class OutputClassifier {
 
 		}
 
-		testClassifier("Adaboost", meetingMachine, posVec, negVec);
-		return;
+		return testClassifier("Adaboost", meetingMachine, posVec, negVec);
 	}
 
-	public static void testSimpleDecision(DecisionStump lv1DecisionTree,
+	public static MeasureInfo testSimpleDecision(DecisionStump lv1DecisionTree,
 			ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
 		ArrayList<TreeMap<Integer, Double>> posVec = new ArrayList<TreeMap<Integer, Double>>();
@@ -91,18 +96,18 @@ public class OutputClassifier {
 			posVec.add(pos.occVec);
 		for (Article neg : negTrainArticles2)
 			negVec.add(neg.occVec);
-		testClassifier("Simple Decision", lv1DecisionTree, posVec, negVec);
+		return testClassifier("Simple Decision", lv1DecisionTree, posVec,
+				negVec);
 	}
 
-	public static void testClassifier(String algName, Classifier classifier,
-			ArrayList<TreeMap<Integer, Double>> posVec,
+	public static MeasureInfo testClassifier(String algName,
+			Classifier classifier, ArrayList<TreeMap<Integer, Double>> posVec,
 			ArrayList<TreeMap<Integer, Double>> negVec) {
-		ArrayList<Integer> posOutput, negOutput, unkOutput;
+		ArrayList<Integer> posOutput, negOutput;
 		int[][] tablePos, tableNeg, tableAll;
 
 		posOutput = new ArrayList<Integer>();
 		negOutput = new ArrayList<Integer>();
-		unkOutput = new ArrayList<Integer>();
 
 		tablePos = new int[2][2];
 		tableNeg = new int[2][2];
@@ -134,21 +139,26 @@ public class OutputClassifier {
 			for (int j = 0; j < 2; j++)
 				tableAll[i][j] = tableNeg[i][j] + tablePos[i][j];
 
-		ModelUtilities.printTable(algName + " Class Positive", tablePos);
-		ModelUtilities.printTable(algName + " Class Negative", tableNeg);
-		ModelUtilities.printTable(algName + " Final", tableAll);
+		ReturnCell<MeasureInfo> posP = new ReturnCell<MeasureInfo>(
+				new MeasureInfo());
+		ReturnCell<MeasureInfo> negP = new ReturnCell<MeasureInfo>(
+				new MeasureInfo());
+		printTable(algName + " Class Positive", tablePos, posP);
+		printTable(algName + " Class Negative", tableNeg, negP);
+		printTable(algName + " Final", tableAll, null);
 		storeOutputFile(algName, posOutput, negOutput);
+		MeasureInfo avg = new MeasureInfo(posP.get(), negP.get());
+		return avg;
 	}
 
-	public static void testLMClassifier(ArrayList<nGram> mixPick,
+	public static MeasureInfo testLMClassifier(ArrayList<nGram> mixPick,
 			LanguageModel LMmachine, ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
-		ArrayList<Integer> posOutput, negOutput, unkOutput;
+		ArrayList<Integer> posOutput, negOutput;
 		int[][] tablePos, tableNeg, tableAll;
 
 		posOutput = new ArrayList<Integer>();
 		negOutput = new ArrayList<Integer>();
-		unkOutput = new ArrayList<Integer>();
 
 		tablePos = new int[2][2];
 		tableNeg = new int[2][2];
@@ -180,24 +190,30 @@ public class OutputClassifier {
 			for (int j = 0; j < 2; j++)
 				tableAll[i][j] = tableNeg[i][j] + tablePos[i][j];
 
+		ReturnCell<MeasureInfo> posP = new ReturnCell<MeasureInfo>(
+				new MeasureInfo());
+		ReturnCell<MeasureInfo> negP = new ReturnCell<MeasureInfo>(
+				new MeasureInfo());
 		String algName = "Language Model";
-		ModelUtilities.printTable(algName + " Class Positive", tablePos);
-		ModelUtilities.printTable(algName + " Class Negative", tableNeg);
-		ModelUtilities.printTable(algName + " Final", tableAll);
+		printTable(algName + " Class Positive", tablePos, posP);
+		printTable(algName + " Class Negative", tableNeg, negP);
+		printTable(algName + " Final", tableAll);
 		storeOutputFile(algName, posOutput, negOutput);
+
+		MeasureInfo avg = new MeasureInfo(posP.get(), negP.get());
+		return avg;
 	}
 
 	public static void storeOutputFile(String algName,
 			ArrayList<Integer> posOutput, ArrayList<Integer> negOutput) {
+
 		try {
-			File A, B, C;
+			File A, B;
 			PrintWriter printWriter;
 			A = new File(Main.outputPath + "/pos/" + algName + ".txt");
 			B = new File(Main.outputPath + "/neg/" + algName + ".txt");
-			C = new File(Main.outputPath + "/unknown/" + algName + ".txt");
 			A.getParentFile().mkdirs();
 			B.getParentFile().mkdirs();
-			C.getParentFile().mkdirs();
 			printWriter = new PrintWriter(A);
 			for (int i = 0; i < posOutput.size(); i++) {
 				String line = "";
@@ -221,5 +237,32 @@ public class OutputClassifier {
 		} catch (Exception e) {
 
 		}
+	}
+
+	public static void printTable(String tableName, int table[][],
+			ReturnCell<MeasureInfo> retInfo) {
+		stdout(String.format("Table `%s`\n", tableName), 1);
+		stdout(String.format("\n|%16s|%15s|%15s|\n", "Truth\\Classifier",
+				"Classifier no", "Classifier yes"), 0);
+		stdout(String.format("|%16s|%15s|%15s|\n", "----------------",
+				"---------------", "---------------"), 0);
+		stdout(String.format("|%16s|%15d|%15d|\n", "Truth no", table[0][0],
+				table[0][1]), 0);
+		stdout(String.format("|%16s|%15d|%15d|\n", "Truth yes", table[1][0],
+				table[1][1]), 0);
+
+		double P, R, F1, beta = 1;
+		P = (double) table[1][1] / (table[1][0] + table[1][1]);
+		R = (double) table[1][1] / (table[0][1] + table[1][1]);
+		F1 = (beta * beta + 1) * P * R / (beta * beta * P + R);
+
+		stdout(String.format("\nP  %.3f %%, R  %.3f %%, F1  %.3f %%\n\n",
+				P * 100, R * 100, F1 * 100), 1);
+		if (retInfo != null)
+			retInfo.set(new MeasureInfo(P, R));
+	}
+
+	public static void printTable(String tableName, int table[][]) {
+		printTable(tableName, table, null);
 	}
 }

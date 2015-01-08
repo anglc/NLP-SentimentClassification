@@ -210,24 +210,4 @@ public class ModelUtilities {
 		}
 		return ret;
 	}
-
-	public static void printTable(String tableName, int table[][]) {
-		System.out.printf("Table `%s`\n\n", tableName);
-		System.out.printf("|%16s|%15s|%15s|\n", "Truth\\Classifier",
-				"Classifier no", "Classifier yes");
-		System.out.printf("|%16s|%15s|%15s|\n", "----------------",
-				"---------------", "---------------");
-		System.out.printf("|%16s|%15d|%15d|\n", "Truth no", table[0][0],
-				table[0][1]);
-		System.out.printf("|%16s|%15d|%15d|\n", "Truth yes", table[1][0],
-				table[1][1]);
-
-		double P, R, F1, beta = 1;
-		P = (double) table[1][1] / (table[1][0] + table[1][1]);
-		R = (double) table[1][1] / (table[0][1] + table[1][1]);
-		F1 = (beta * beta + 1) * P * R / (beta * beta * P + R);
-		System.out.printf("\nP  %.2f %%, R  %.2f %%, F1  %.2f %%\n", P * 100,
-				R * 100, F1 * 100);
-		System.out.println();
-	}
 }

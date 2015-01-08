@@ -59,7 +59,8 @@ public class Loader {
 		// System.out.printf("AFINN-111.txt = %d\n", wordWeight.size());
 		ModelUtilities.addWordWeight(wordWeight);
 
-		stopWordsFile = new File(path + "/extra/en.stopnegation-removed.txt");
+//		stopWordsFile = new File(path + "/extra/en.stopnegation-removed.txt");
+		stopWordsFile = new File(path + "/extra/stopwords.txt");
 		stopWords = new TreeSet<String>();
 		storeWords(stopWordsFile, stopWords);
 		ModelUtilities.ignoreToken = stopWords;

@@ -1,7 +1,12 @@
 package model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
+
+import main.Article;
+import main.Main;
 
 public class WinnowMachine implements Classifier {
 	public double[] f;
@@ -95,5 +100,38 @@ public class WinnowMachine implements Classifier {
 			selfMin = Math.min(selfMin, pc);
 			selfMax = Math.max(selfMax, pc);
 		}
+	}
+
+	@Override
+	public void training(ArrayList<Article> posTrainArticles,
+			ArrayList<Article> negTrainArticles, int kind) {
+		ArrayList<Article> articles = new ArrayList<Article>();
+		articles.addAll(posTrainArticles);
+		articles.addAll(negTrainArticles);
+		Main.stdout(String.format("\ncomplete |"), 0);
+
+		for (int it = 0; it < Main.ITLIMIT; it++) {
+			if (it % (Main.ITLIMIT / 10) == 0)
+				Main.stdout(String.format(">"), 0);
+			Collections.shuffle(articles);
+			for (int i = 0; i < articles.size(); i++) {
+				if (articles.get(i).polarity > 0) {
+					this.add(articles.get(i).vec, 1);
+				} else {
+					this.add(articles.get(i).vec, 0);
+				}
+			}
+		}
+		Main.stdout(String.format("|\n\n"), 0);
+
+		this.initSelfTraining();
+		for (int i = 0; i < articles.size(); i++) {
+			if (articles.get(i).polarity > 0) {
+				this.selfTraining(articles.get(i).vec, 1);
+			} else {
+				this.selfTraining(articles.get(i).vec, 0);
+			}
+		}
+
 	}
 }

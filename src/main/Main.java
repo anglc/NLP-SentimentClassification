@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -21,23 +23,23 @@ import model.nGram;
 //test
 public class Main {
 	public static LanguageModel LMmachine;
-	public static WinnowMachine MLmachine[];
-	public static PassiveAggressive PAmachine[], meetingMachine;
+	public static WinnowMachine MLmachines[];
+	public static PassiveAggressive PAmachines[], meetingMachine;
 	public static DecisionStump lv1DecisionTree;
 	public static Loader loader;
-	public static ArrayList<nGram> posPick, negPick, mixPick;
-	public static TreeSet<nGram> posPickSet, negPickSet, mixPickSet;
-	public static TreeMap<nGram, Integer> mixPickPosMap;
 	public static String outputPath;
-	public static ArrayList<Article> posTrainArticles, negTrainArticles;
-	public static ArrayList<TreeMap<Integer, Double>> posTestVec;
-	public static ArrayList<TreeMap<Integer, Double>> negTestVec;
 	public static String[] posTest, posTrain, negTest, negTrain;
 	public final static int ITLIMIT = 32;
+	public static int stdout_status = 1;
 
 	public static void main(String[] args) {
 		// Dashboard demo = new Dashboard();
 		work(3, 40000, "training_set");
+	}
+
+	public static void stdout(String s, int priority) {
+		if (stdout_status == 1 && priority > 0)
+			System.out.print(s);
 	}
 
 	public static void work(int Ngram, int topNgram, String trainingPath) {
@@ -47,12 +49,111 @@ public class Main {
 		System.out.println("## Configuration ##\n");
 		System.out.printf("* Ngram %d\n* topNgram %d\n", Ngram, topNgram);
 
-		shuffleChooser.shuffle(1, 0);
+		TreeMap<nGram, Double> ngramScoreMap = new TreeMap<nGram, Double>();
+		TreeSet<nGram> posPickSet = null, negPickSet = null, mixPickSet = null;
+		TreeMap<nGram, Integer> mixPickPosMap = null;
+		ArrayList<nGram> mixPick = null;
+		for (int cross = 0; cross < 5; cross++) { // 2-fold cross-validation
+			shuffleChooser.shuffle(1, 1);
+			posTrain = shuffleChooser.posTrain
+					.toArray(new String[shuffleChooser.posTrain.size()]);
+			negTrain = shuffleChooser.negTrain
+					.toArray(new String[shuffleChooser.negTrain.size()]);
+
+			ArrayList<Article> posTrainArticles, negTrainArticles;
+			posTrainArticles = new ArrayList<Article>();
+			negTrainArticles = new ArrayList<Article>();
+
+			for (int i = 0; i < posTrain.length; i++)
+				posTrainArticles.add(new Article(posTrain[i], 1));
+			for (int i = 0; i < negTrain.length; i++)
+				negTrainArticles.add(new Article(negTrain[i], -1));
+
+			posPickSet = new TreeSet<nGram>();
+			negPickSet = new TreeSet<nGram>();
+			mixPickSet = new TreeSet<nGram>();
+			mixPickPosMap = new TreeMap<nGram, Integer>();
+
+			stdout(String.format("\n# Cross-validation Work %d #\n\n", cross),
+					1);
+
+			mixPick = experiment(Ngram, topNgram, posTrainArticles,
+					negTrainArticles, posPickSet, negPickSet, mixPickSet,
+					mixPickPosMap, null);
+			posTest = shuffleChooser.posTest
+					.toArray(new String[shuffleChooser.posTest.size()]);
+			negTest = shuffleChooser.negTest
+					.toArray(new String[shuffleChooser.negTest.size()]);
+
+			MeasureInfo performance;
+			performance = processTestInput(Ngram, topNgram, posTest, negTest,
+					mixPick, posPickSet, negPickSet, mixPickSet, mixPickPosMap);
+
+			System.out.printf("performance %f\n\n", performance.P * 100);
+
+			for (int i = 0; i < mixPick.size(); i++) {
+				nGram e = mixPick.get(i);
+				double score = performance.P, w = 1;
+				// for (int j = 0; j < PAmachine.length; j++)
+				// w += Math.abs(PAmachine[j].w[i]);
+				score *= w;
+				if (ngramScoreMap.containsKey(e))
+					score += ngramScoreMap.get(e);
+				ngramScoreMap.put(e, score);
+			}
+		}
+
+		afterTraining(Ngram, topNgram, loader, shuffleChooser, ngramScoreMap);
+	}
+
+	public static void afterTraining(int Ngram, int topNgram, Loader loader,
+			ShuffleChooser shuffleChooser, TreeMap<nGram, Double> ngramScoreMap) {
+		ArrayList<Pair<nGram, Double>> ngramScoreArr = new ArrayList<Pair<nGram, Double>>();
+		TreeSet<nGram> retainNgram = new TreeSet<nGram>();
+		int retainNgramSize = ngramScoreMap.size() / 5;
+
+		for (Map.Entry<nGram, Double> e : ngramScoreMap.entrySet()) {
+			Pair<nGram, Double> p;
+			p = new Pair<nGram, Double>(e.getKey(), e.getValue());
+			ngramScoreArr.add(p);
+		}
+		Collections.sort(ngramScoreArr, new Comparator<Pair<nGram, Double>>() {
+			@Override
+			public int compare(Pair<nGram, Double> a, Pair<nGram, Double> b) {
+				int c = Double.compare(a.getSecond(), b.getSecond());
+				return -c;
+			}
+		});
+		for (int i = 0; i < retainNgramSize && i < ngramScoreArr.size(); i++)
+			retainNgram.add(ngramScoreArr.get(i).getFirst());
+
+		// for (int i = 0; i < 100 && i < ngramScoreArr.size(); i++) {
+		// nGram e = ngramScoreArr.get(i).getFirst();
+		// System.out.printf("Score ( ");
+		// for (int j = 0; j < e.iWord.length; j++) {
+		// System.out
+		// .printf("%s ", ModelUtilities.getWordName(e.iWord[j]));
+		// }
+		// System.out.println(")");
+		// }
+
+		TreeSet<nGram> posPickSet = null, negPickSet = null, mixPickSet = null;
+		TreeMap<nGram, Integer> mixPickPosMap = null;
+		ArrayList<nGram> mixPick = null;
+		shuffleChooser.shuffle(7, 3);
 		posTrain = shuffleChooser.posTrain
 				.toArray(new String[shuffleChooser.posTrain.size()]);
 		negTrain = shuffleChooser.negTrain
 				.toArray(new String[shuffleChooser.negTrain.size()]);
 
+		posPickSet = new TreeSet<nGram>();
+		negPickSet = new TreeSet<nGram>();
+		mixPickSet = new TreeSet<nGram>();
+		mixPickPosMap = new TreeMap<nGram, Integer>();
+
+		stdout(String.format("\n# Final Work #\n\n"), 1);
+
+		ArrayList<Article> posTrainArticles, negTrainArticles;
 		posTrainArticles = new ArrayList<Article>();
 		negTrainArticles = new ArrayList<Article>();
 
@@ -61,17 +162,42 @@ public class Main {
 		for (int i = 0; i < negTrain.length; i++)
 			negTrainArticles.add(new Article(negTrain[i], -1));
 
-		experiment(Ngram, topNgram);
+		mixPick = experiment(Ngram, topNgram, posTrainArticles,
+				negTrainArticles, posPickSet, negPickSet, mixPickSet,
+				mixPickPosMap, retainNgram);
 
+		posTest = shuffleChooser.posTest
+				.toArray(new String[shuffleChooser.posTest.size()]);
+		negTest = shuffleChooser.negTest
+				.toArray(new String[shuffleChooser.negTest.size()]);
+
+		for (int i = 0; i < posTest.length; i++)
+			posTrainArticles.add(new Article(posTest[i], 1));
+		for (int i = 0; i < negTest.length; i++)
+			negTrainArticles.add(new Article(negTest[i], -1));
+
+		preprocessInput(Ngram, posTrainArticles, negTrainArticles, mixPick,
+				posPickSet, negPickSet, mixPickSet, mixPickPosMap);
+
+		retraining(posTrainArticles, negTrainArticles);
+		
 		posTest = loader.testPos.toArray(new String[loader.testPos.size()]);
 		negTest = loader.testNeg.toArray(new String[loader.testNeg.size()]);
 
-		processUserInput(Ngram, topNgram, posTest, negTest);
+		// posTest = posTrain;
+		// negTest = negTrain;
+
+		MeasureInfo performance;
+		performance = processTestInput(Ngram, topNgram, posTest, negTest,
+				mixPick, posPickSet, negPickSet, mixPickSet, mixPickPosMap);
+
+		System.out.printf("performance %f\n\n", performance.P * 100);
 	}
 
-	public static void processUserInput(int Ngram, int topNgram,
-			String[] posTest, String[] negTest) {
-		topNgram = mixPick.size();
+	public static MeasureInfo processTestInput(int Ngram, int topNgram,
+			String[] posTest, String[] negTest, ArrayList<nGram> mixPick,
+			TreeSet<nGram> posPickSet, TreeSet<nGram> negPickSet,
+			TreeSet<nGram> mixPickSet, TreeMap<nGram, Integer> mixPickPosMap) {
 		ArrayList<Article> posTrainArticles2, negTrainArticles2;
 		posTrainArticles2 = new ArrayList<Article>();
 		negTrainArticles2 = new ArrayList<Article>();
@@ -80,7 +206,8 @@ public class Main {
 		for (int i = 0; i < negTest.length; i++)
 			negTrainArticles2.add(new Article(negTest[i], -1));
 
-		preprocessInput(Ngram, posTrainArticles2, negTrainArticles2);
+		preprocessInput(Ngram, posTrainArticles2, negTrainArticles2, mixPick,
+				posPickSet, negPickSet, mixPickSet, mixPickPosMap);
 
 		ArrayList<TreeMap<Integer, Double>> posVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<TreeMap<Integer, Double>> negVec = new ArrayList<TreeMap<Integer, Double>>();
@@ -88,85 +215,126 @@ public class Main {
 			posVec.add(pos.vec);
 		for (Article neg : negTrainArticles2)
 			negVec.add(neg.vec);
-		System.out.println("\n# User Require #\n");
-		OutputClassifier.testLMClassifier(mixPick, LMmachine,
+		stdout(String.format("\n# Test #\n\n"), 1);
+
+		MeasureInfo best = new MeasureInfo(), worst = new MeasureInfo(), avg = new MeasureInfo(), tmp;
+		best.P = 0;
+		worst.P = 1;
+		avg.P = 0;
+		tmp = OutputClassifier.testLMClassifier(mixPick, LMmachine,
 				posTrainArticles2, negTrainArticles2);
-		OutputClassifier.testClassifier("Winnow", MLmachine[0], posVec, negVec);
-		OutputClassifier.testClassifier("Passive-Aggressive", PAmachine[0],
-				posVec, negVec);
-		OutputClassifier.testSimpleDecision(lv1DecisionTree, posTrainArticles2,
-				negTrainArticles2);
-		OutputClassifier.testMeetingInterview(lv1DecisionTree, meetingMachine,
-				LMmachine, MLmachine, PAmachine, Ngram, topNgram,
+		best.P = Math.max(best.P, tmp.P);
+		worst.P = Math.min(worst.P, tmp.P);
+		avg.P += tmp.P;
+
+		for (int i = 0; i < MLmachines.length; i++) {
+			tmp = OutputClassifier.testClassifier("Winnow", MLmachines[i],
+					posVec, negVec);
+			best.P = Math.max(best.P, tmp.P);
+			worst.P = Math.min(worst.P, tmp.P);
+			avg.P += tmp.P;
+		}
+
+		for (int i = 0; i < PAmachines.length; i++) {
+			tmp = OutputClassifier.testClassifier("Passive-Aggressive",
+					PAmachines[0], posVec, negVec);
+			best.P = Math.max(best.P, tmp.P);
+			worst.P = Math.min(worst.P, tmp.P);
+			avg.P += tmp.P;
+		}
+
+		tmp = OutputClassifier.testSimpleDecision(lv1DecisionTree,
 				posTrainArticles2, negTrainArticles2);
+		best.P = Math.max(best.P, tmp.P);
+		worst.P = Math.min(worst.P, tmp.P);
+		avg.P += tmp.P;
+		tmp = OutputClassifier.testMeetingInterview(lv1DecisionTree,
+				meetingMachine, LMmachine, MLmachines, PAmachines, Ngram,
+				topNgram, posTrainArticles2, negTrainArticles2);
+		best.P = Math.max(best.P, tmp.P);
+		worst.P = Math.min(worst.P, tmp.P);
+		avg.P += tmp.P;
+		avg.P /= (3 + MLmachines.length + PAmachines.length);
+		return best;
 	}
 
-	public static void experiment(int Ngram, int topNgram) {
-		System.out.println("\n## Work ##\n");
-		System.out.printf("* positive sieve %d-grams building ...\n", Ngram);
+	public static ArrayList<nGram> experiment(int Ngram, int topNgram,
+			ArrayList<Article> posTrainArticles,
+			ArrayList<Article> negTrainArticles, TreeSet<nGram> posPickSet,
+			TreeSet<nGram> negPickSet, TreeSet<nGram> mixPickSet,
+			TreeMap<nGram, Integer> mixPickPosMap, TreeSet<nGram> retainNgram) {
+
+		stdout(String.format("* positive sieve %d-grams building ...\n", Ngram),
+				1);
+
 		DataSieve posSieve = new DataSieve(Ngram, posTrain, negTrain);
 
 		// posSieve.printBestNgram(20);
 		// System.exit(0);
 
-		System.out.printf("* negative sieve %d-grams building ...\n\n", Ngram);
+		stdout(String.format("* negative sieve %d-grams building ...\n", Ngram),
+				1);
+
 		DataSieve negSieve = new DataSieve(Ngram, negTrain, posTrain);
 
 		// negSieve.printBestNgram(20);
 		// System.exit(0);
+		stdout(String.format("* positive #ngram %d\n", posSieve.ngramCount), 1);
+		stdout(String.format("* negative #ngram %d\n", negSieve.ngramCount), 1);
 
-		System.out.printf("* positive #ngram %d\n", posSieve.ngramCount);
-		System.out.printf("* negative #ngram %d\n", negSieve.ngramCount);
+		ArrayList<nGram> posPick, negPick, mixPick;
 
 		posPick = posSieve.getBestNgram(topNgram / 2);
 		negPick = negSieve.getBestNgram(topNgram / 2);
 
-		PickTool pickTool = new PickTool(posPick, negPick);
+		PickTool pickTool = new PickTool(posPick, negPick, retainNgram);
 
-		posPickSet = new TreeSet<nGram>();
-		negPickSet = new TreeSet<nGram>();
 		mixPick = pickTool.getMixPick(topNgram, posPickSet, negPickSet);
-		mixPickSet = new TreeSet<nGram>();
-		mixPickPosMap = new TreeMap<nGram, Integer>();
+
 		for (int i = 0; i < mixPick.size(); i++) {
 			mixPickPosMap.put(mixPick.get(i), i);
 			mixPickSet.add(mixPick.get(i));
 		}
 		topNgram = mixPick.size();
-		System.out.printf("* actual #top-Ngrams %d\n", topNgram);
-		preprocessInput(Ngram, posTrainArticles, negTrainArticles);
 
-		MLmachine = new WinnowMachine[3];
-		PAmachine = new PassiveAggressive[3];
+		stdout(String.format("* actual #top-Ngrams %d\n", topNgram), 1);
 
-		System.out.println("\n## Simple Decision ##\n");
+		preprocessInput(Ngram, posTrainArticles, negTrainArticles, mixPick,
+				posPickSet, negPickSet, mixPickSet, mixPickPosMap);
+
+		MLmachines = new WinnowMachine[2];
+		PAmachines = new PassiveAggressive[2];
+
+		stdout(String.format("\n## Simple Decision ##\n"), 1);
 		lv1DecisionTree = createSimpleDecision(posTrainArticles,
 				negTrainArticles);
-		System.out.println("\n## Language Model ##\n");
-		LMmachine = createLanguageModel(Ngram, topNgram, posTrainArticles,
+		stdout(String.format("\n## Language Model ##\n"), 1);
+		LMmachine = createLanguageModel(Ngram, posTrainArticles,
 				negTrainArticles);
-		System.out.println("\n## Winnow Algorithm ##\n");
-		for (int i = 0; i < MLmachine.length; i++)
-			MLmachine[i] = createWinnow(topNgram, posTrainArticles,
+		stdout(String.format("\n## Winnow Algorithm ##\n"), 1);
+		for (int i = 0; i < MLmachines.length; i++)
+			MLmachines[i] = createWinnow(topNgram, posTrainArticles,
 					negTrainArticles);
-		System.out.println("## Passive-Aggressive Algorithm ##\n");
-		for (int i = 0; i < PAmachine.length; i++)
-			PAmachine[i] = createPassiveAggressive(topNgram, posTrainArticles,
+		stdout(String.format("\n## Passive-Aggressive Algorithm ##\n"), 1);
+		for (int i = 0; i < PAmachines.length; i++)
+			PAmachines[i] = createPassiveAggressive(topNgram, posTrainArticles,
 					negTrainArticles);
-		System.out.println("\n## Adaboost ##\n");
-		meetingMachine = createMeeting(LMmachine, MLmachine, PAmachine,
+		stdout(String.format("\n## Adaboost ##\n"), 1);
+		meetingMachine = createMeeting(LMmachine, MLmachines, PAmachines,
 				lv1DecisionTree, Ngram, topNgram, mixPick, posTrainArticles,
 				negTrainArticles);
-
+		return mixPick;
 	}
 
 	public static void preprocessInput(int Ngram,
 			ArrayList<Article> posTrainArticles,
-			ArrayList<Article> negTrainArticles) {
+			ArrayList<Article> negTrainArticles, ArrayList<nGram> mixPick,
+			TreeSet<nGram> posPickSet, TreeSet<nGram> negPickSet,
+			TreeSet<nGram> mixPickSet, TreeMap<nGram, Integer> mixPickPosMap) {
 		int n = posTrainArticles.size();
 		int m = negTrainArticles.size();
-		System.out
-				.printf("\npreprocess %d pos, %d neg-items to vector\n", n, m);
+		stdout(String.format("\npreprocess %d pos, %d neg-items to vector\n",
+				n, m), 1);
 		for (int i = 0; i < n; i++)
 			posTrainArticles.get(i).preprocess(Ngram, posPickSet, negPickSet,
 					mixPick, mixPickPosMap);
@@ -179,33 +347,7 @@ public class Main {
 			ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
 		DecisionStump lv1DecisionTree = new DecisionStump(5);
-		int n = posTrainArticles2.size();
-		int m = negTrainArticles2.size();
-		ArrayList<Article> articles = new ArrayList<Article>();
-		articles.addAll(posTrainArticles2);
-		articles.addAll(negTrainArticles2);
-
-		System.out.printf("\ncomplete |");
-		for (int it = 0; it < ITLIMIT; it++) {
-			if (it % (ITLIMIT / 10) == 0)
-				System.out.printf(">");
-			Collections.shuffle(articles);
-			for (int i = 0; i < articles.size(); i++) {
-				if (articles.get(i).polarity > 0) {
-					lv1DecisionTree.add(articles.get(i).occVec, 1);
-				} else {
-					lv1DecisionTree.add(articles.get(i).occVec, -1);
-				}
-			}
-		}
-		System.out.printf("|\n\n");
-		for (int i = 0; i < articles.size(); i++) {
-			if (articles.get(i).polarity > 0) {
-				lv1DecisionTree.selfTraining(articles.get(i).occVec, 1);
-			} else {
-				lv1DecisionTree.selfTraining(articles.get(i).occVec, -1);
-			}
-		}
+		lv1DecisionTree.training(posTrainArticles2, negTrainArticles2, 1);
 		return lv1DecisionTree;
 	}
 
@@ -219,8 +361,6 @@ public class Main {
 		PassiveAggressive meetingMachine = new PassiveAggressive(vectorSize);
 		ArrayList<TreeMap<Integer, Double>> votePosVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<TreeMap<Integer, Double>> voteNegVec = new ArrayList<TreeMap<Integer, Double>>();
-		int n = posTrainArticles2.size();
-		int m = negTrainArticles2.size();
 		ArrayList<Article> articles = new ArrayList<Article>();
 		articles.addAll(posTrainArticles2);
 		articles.addAll(negTrainArticles2);
@@ -238,12 +378,12 @@ public class Main {
 				voteVec.put(0 * 2 + 1, predictW);
 
 			predict = lv1DecisionTree.classify(article.occVec);
-			predictW = 1;
+			predictW = 0;
 			if (predict)
 				voteVec.put(1 * 2, predictW);
 			else
 				voteVec.put(1 * 2 + 1, predictW);
-			
+
 			for (int j = 0; j < MLmachine2.length; j++) {
 				predict = MLmachine2[j].classify(article.vec);
 				predictW = MLmachine2[j].strongClassify(article.vec);
@@ -252,7 +392,7 @@ public class Main {
 				else
 					voteVec.put((j + base1) * 2 + 1, predictW);
 			}
-			
+
 			for (int j = 0; j < PAmachine2.length; j++) {
 				predict = PAmachine2[j].classify(article.vec);
 				predictW = PAmachine2[j].strongClassify(article.vec);
@@ -267,115 +407,93 @@ public class Main {
 			else
 				voteNegVec.add(voteVec);
 		}
-
-		System.out.printf("\ncomplete |");
-		for (int it = 0; it < ITLIMIT * 10; it++) {
-			if (it % (ITLIMIT * 10 / 10) == 0)
-				System.out.printf(">");
-			int posIdx = 0, negIdx = 0;
-			while (posIdx < votePosVec.size() || negIdx < voteNegVec.size()) {
-				if (Math.random() < 0.5 && posIdx < votePosVec.size()) {
-					meetingMachine.add(votePosVec.get(posIdx), 1);
-					posIdx++;
-				} else if (negIdx < voteNegVec.size()) {
-					meetingMachine.add(voteNegVec.get(negIdx), -1);
-					negIdx++;
-				}
-			}
-		}
-		System.out.printf("|\n\n");
-
+		meetingMachine.training(votePosVec, voteNegVec);
 		return meetingMachine;
 	}
 
-	public static LanguageModel createLanguageModel(int Ngram, int topNgram,
+	public static LanguageModel createLanguageModel(int Ngram,
 			ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
-
 		LanguageModel LMmachine = new LanguageModel(Ngram);
-		for (Article pos : posTrainArticles2)
-			LMmachine.add(pos.occGramVec, "pos");
-		for (Article neg : negTrainArticles2)
-			LMmachine.add(neg.occGramVec, "neg");
-
-		for (Article pos : posTrainArticles2)
-			LMmachine.selfTraining(pos.occGramVec, "pos");
-		for (Article neg : negTrainArticles2)
-			LMmachine.selfTraining(neg.occGramVec, "neg");
-
+		LMmachine.training(posTrainArticles2, negTrainArticles2);
 		return LMmachine;
 	}
 
 	public static WinnowMachine createWinnow(int topNgram,
 			ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
-		int n = posTrainArticles2.size();
-		int m = negTrainArticles2.size();
-		ArrayList<Article> articles = new ArrayList<Article>();
-		articles.addAll(posTrainArticles2);
-		articles.addAll(negTrainArticles2);
 		WinnowMachine MLmachine = new WinnowMachine(topNgram);
-
-		System.out.printf("\ncomplete |");
-		for (int it = 0; it < ITLIMIT; it++) {
-			if (it % (ITLIMIT / 10) == 0)
-				System.out.printf(">");
-			Collections.shuffle(articles);
-			for (int i = 0; i < articles.size(); i++) {
-				if (articles.get(i).polarity > 0) {
-					MLmachine.add(articles.get(i).vec, 1);
-				} else {
-					MLmachine.add(articles.get(i).vec, 0);
-				}
-			}
-		}
-		System.out.printf("|\n\n");
-
-		for (int i = 0; i < articles.size(); i++) {
-			if (articles.get(i).polarity > 0) {
-				MLmachine.selfTraining(articles.get(i).vec, 1);
-			} else {
-				MLmachine.selfTraining(articles.get(i).vec, 0);
-			}
-		}
-
+		MLmachine.training(posTrainArticles2, negTrainArticles2, 0);
 		return MLmachine;
 	}
 
 	public static PassiveAggressive createPassiveAggressive(int topNgram,
 			ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
-		int n = posTrainArticles2.size();
-		int m = negTrainArticles2.size();
+		PassiveAggressive PAmachine = new PassiveAggressive(topNgram);
+		PAmachine.training(posTrainArticles2, negTrainArticles2, 0);
+		return PAmachine;
+	}
+
+	public static void retraining(ArrayList<Article> posTrainArticles2,
+			ArrayList<Article> negTrainArticles2) {
+		for (PassiveAggressive PAmachine : PAmachines) {
+			PAmachine.training(posTrainArticles2, negTrainArticles2, 0);
+		}
+		for (WinnowMachine MLmachine : MLmachines) {
+			MLmachine.training(posTrainArticles2, negTrainArticles2, 0);
+		}
+		lv1DecisionTree.training(posTrainArticles2, negTrainArticles2, 1);
+
+		int base1 = 2, base2 = 2 + MLmachines.length;
+		ArrayList<TreeMap<Integer, Double>> votePosVec = new ArrayList<TreeMap<Integer, Double>>();
+		ArrayList<TreeMap<Integer, Double>> voteNegVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<Article> articles = new ArrayList<Article>();
 		articles.addAll(posTrainArticles2);
 		articles.addAll(negTrainArticles2);
 
-		PassiveAggressive PAmachine = new PassiveAggressive(topNgram);
+		for (Article article : articles) {
+			double predictW;
+			boolean predict;
+			TreeMap<Integer, Double> voteVec = new TreeMap<Integer, Double>();
 
-		System.out.printf("\ncomplete |");
-		for (int it = 0; it < ITLIMIT; it++) {
-			if (it % (ITLIMIT / 10) == 0)
-				System.out.printf(">");
-			Collections.shuffle(articles);
-			for (int i = 0; i < articles.size(); i++) {
-				if (articles.get(i).polarity > 0) {
-					PAmachine.add(articles.get(i).vec, 1);
-				} else {
-					PAmachine.add(articles.get(i).vec, -1);
-				}
+			predict = LMmachine.classify(article.occGramVec);
+			predictW = 1;
+			if (predict)
+				voteVec.put(0 * 2, predictW);
+			else
+				voteVec.put(0 * 2 + 1, predictW);
+
+			predict = lv1DecisionTree.classify(article.occVec);
+			predictW = 0;
+			if (predict)
+				voteVec.put(1 * 2, predictW);
+			else
+				voteVec.put(1 * 2 + 1, predictW);
+
+			for (int j = 0; j < MLmachines.length; j++) {
+				predict = MLmachines[j].classify(article.vec);
+				predictW = MLmachines[j].strongClassify(article.vec);
+				if (predict)
+					voteVec.put((j + base1) * 2, predictW);
+				else
+					voteVec.put((j + base1) * 2 + 1, predictW);
 			}
-		}
-		System.out.printf("|\n\n");
 
-		for (int i = 0; i < articles.size(); i++) {
-			if (articles.get(i).polarity > 0) {
-				PAmachine.selfTraining(articles.get(i).vec, 1);
-			} else {
-				PAmachine.selfTraining(articles.get(i).vec, -1);
+			for (int j = 0; j < PAmachines.length; j++) {
+				predict = PAmachines[j].classify(article.vec);
+				predictW = PAmachines[j].strongClassify(article.vec);
+				if (predict)
+					voteVec.put((j + base2) * 2, predictW);
+				else
+					voteVec.put((j + base2) * 2 + 1, predictW);
 			}
-		}
 
-		return PAmachine;
+			if (article.polarity > 0)
+				votePosVec.add(voteVec);
+			else
+				voteNegVec.add(voteVec);
+		}
+		meetingMachine.training(votePosVec, voteNegVec);
 	}
 }

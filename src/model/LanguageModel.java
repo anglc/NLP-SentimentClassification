@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import main.Article;
+
 public class LanguageModel {
 	/*
 	 * wordCategory[category][nGram] = count, get nGram appear in category.
@@ -61,7 +63,6 @@ public class LanguageModel {
 		categoryWordCount.put(c, categoryWordCount.get(c) + total);
 	}
 
-	
 	private double probabilityOfClass(String className, Integer classCount,
 			TreeMap<nGram, Integer> record) {
 		double Pc, P, count_c, count_w_c;
@@ -128,5 +129,18 @@ public class LanguageModel {
 			selfMin = Math.min(selfMin, maxPwc);
 			selfMax = Math.max(selfMax, maxPwc);
 		}
+	}
+
+	public void training(ArrayList<Article> posTrainArticles,
+			ArrayList<Article> negTrainArticles) {
+		for (Article pos : posTrainArticles)
+			this.add(pos.occGramVec, "pos");
+		for (Article neg : negTrainArticles)
+			this.add(neg.occGramVec, "neg");
+
+		for (Article pos : posTrainArticles)
+			this.selfTraining(pos.occGramVec, "pos");
+		for (Article neg : negTrainArticles)
+			this.selfTraining(neg.occGramVec, "neg");
 	}
 }
