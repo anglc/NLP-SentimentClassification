@@ -74,10 +74,69 @@ N-grams Bonus = {1, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07};
 
 當 K 很大時，部分的 n-grams 甚至只出現在某些的 training set 中，這造成訓練 Winnow, Passive-Aggressive 的結果並不好，過於分配無用的權重給只出現在 training set 的 feature。在實驗中，挑選 K = 30000 與 K = 50000 的差異並不大，挑選的比例約為 5% 以內。
 
-### Improve ##
+### Improve ###
+
+#### LM Classifier ####
+
+關於論文中提到的 LM filter，試圖去替除掉一些主觀句子，根據每一個句子進行閥值的評測，實驗中測試到非常低的值作為閥值才具有較好的可能性，由於太高、太低都會使得準確度下降，估計這個閥值的調整不具有普遍性。
+
+而其他的 Classifier 並沒有做這類的主客觀篩選，也許可以藉由主客觀句子的判斷做一套分類器，說不定可以改善另外兩個分類器的語意判斷能力。
+
+#### Combine Classifier ####
 
 發現到 Winnow, Passive-Aggressive (PA) 都是以閥值作為判斷標準，因此當得到靠近閥值的數據下，判斷能力是相當脆弱。雖然 PA 在平均表現最好，大約落在 85% 附近，遠比 LM 和 Winnow 多了 5% ~ 10% 的準確度，如何加強？ 
+
+將四個 Classifier 串在一起，並且用八個 attribute 作為一個 feature vector，接著訓練這一個感知機。這八個 attribute 分別是每一個 Classifier 的判斷強度。
+
+```
+(LM_POS, LM_NEG, WINNOW_POS, WINNOW_NEG, PA_POS, PA_NEG, SIMPLE_POS, SIMPLE_NEG)
+```
+
+其中由於 Language Model (LM) 的機率不好量化，因此單純採用 0/1 的方式表示。嘗試過取 log 發現仍然並不好。
+
+* LM_POS : if LM.classify(x) = POS, then LM_POS = 1. Otherwise LM_POS = 0
+* LM_NEG : if LM.classify(x) = NEG, then LM_NEG = 1. Otherwise LM_POS = 0
+* WINNOW_POS : if Winnow.classify(x) = POS, the WINNOW_POS = Winnow.strongClassify(x).
+* WINNOW_NEG : if Winnow.classify(x) = NEG, the WINNOW_NEG = Winnow.strongClassify(x).
+
+strongClassify(x) 從 training data 中得到 h(x) 的出現的最大值，然後根據將判斷的函數大小得到，`strongClassify(x) = h(x) / TRAINING_MAX_H_VALUE`，之所以不直接使用 `strongClassify(x) = h(x)` 是因為很容易造成 overflow 或者是過度的調整判斷。在實驗結果後，將後者公式調整為前者所使用的。
+
+當然可以訓練多台，並且串在一起，但是這種串法必須盡可能有所歧異性，並不是串越多越好，可以藉較少次的迭代次數、洗牌後的訓練序列來達到歧異性。PA 具有良好的適應性，在訓練集與測資集大小、差異不大時，效能仍然可以保持著線性關係，相當具有魯棒性。 
+
+在實驗觀察中可以明白感知器在越少 feature 下，可以在越少迭代次數中訓練完成，相對地適應能力就會隨差異嚴重波動，實驗中使用的幾個感知機模型，都能在 vector 得到後的幾秒內完成訓練，不用勞費 SVM 的數個小時。Language Model 則會因為 feature 越多，展現更加穩定的效能，即便如此，LM 在負面評論的辨識率仍然不高，這一點從論文中也可以看得出具有相同的現象。
+
+藉此把 LM 對於負面評論辨識率很差的特性，才將其判斷與其他的感知機串在一起使用。這一類的串許多的分類器的算法，可以參照 Adaboost (Adaptive Boosting) 的想法。
+
+#### N-grams Score ####
+
+特別小心公式的計算，雖然有很多乘除法，可以使用 `Math.log` 降下來，防止 overflow 的可能，但同時也會造成嚴重的浮點數誤差。所以使用恰當的 `double` 運算即可，即使遇到 `NaN` 也沒有關係。
+
+#### Process ####
+
+經過幾次的 cross validation 後，每一次會挑到不同的 feature n-grams，藉由交叉驗證得到不同的精準度 P，同時也將挑選的 n-grams 增加 P 的權重，在實驗中總共做了 5 次 cross validation，針對同一組 800 資料，進行 `1 : 1` 的劃分。原本預期挑選 40K 個不同的 n-grams 作為 feature，但是經過 5 次實驗，總共得到 50K 個不同的 n-grams，根據累加的 P 值進行由大排到小，挑選 1/5 的 n-grams 出來，最後挑了少於 10K 個做為 feature。
+
+針對已知的 1600 筆資料進行 `3 : 1` 的劃分，先對數量較多的資料重訓練，隨後才將數量較少放在一起做第二次訓練。防止過度的訓練，導致感知器針對訓練集的已知資訊分配過多的權重，反而針對未知的元素不足以判斷。
+
+## To do ##
+
+增加兩個不在 top feature 中的 attribute，但是在 pos/neg word weight 中的 n-grams 所評分的結果。在量化這些 n-grams 的分數時，不管正反面的強度，一律取絕對值進行加總，有可能一個正面單詞跟一個負面單詞合併在一起來表示一個更強烈的正面或反面資訊。
+
+## extra data support ##
+
+* AFINN-111.txt
+* positive word list (ignore) 毫無幫助
+* negative word list (ignore) 毫無幫助
+* negation not (ignore) 目前發現只會更糟糕
 
 # 程式撰寫 #
 
 ## N-grams Storing ##
+
+`string` 轉 `integer` 標記。
+
+## How to improve experiment ##
+
+先用同一份資料訓練、測試，查看是否接近 `P = R = 100%`，接著放入未知的資料，找到挑選 feature n-grams 之間的差異。
+
+列出幾個可能的差異後，從訓練的感知機中得到每一項的權重，由於是線性分類器，權重的大小即可作為是否具有特色，通常差距會達到 10 ~ 100 倍之間。即使從 N-grams score 得到較高的分數，從感知機中會發現到未必是較大的權重，有可能是某幾篇相關的電影所造成的一面倒。
+
