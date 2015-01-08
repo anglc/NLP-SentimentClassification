@@ -52,7 +52,7 @@ public class WinnowMachine implements Classifier {
 			if (hx < threshold) {
 				for (Map.Entry<Integer, Double> e : x.entrySet()) {
 					int i = e.getKey();
-					if (i < f.length)
+					if (i < f.length && e.getValue() > 0)
 						f[i] *= 2;
 				}
 			} else {
@@ -62,7 +62,7 @@ public class WinnowMachine implements Classifier {
 			if (hx > threshold) {
 				for (Map.Entry<Integer, Double> e : x.entrySet()) {
 					int i = e.getKey();
-					if (i < f.length)
+					if (i < f.length && e.getValue() > 0)
 						f[i] /= 2;
 				}
 			} else {

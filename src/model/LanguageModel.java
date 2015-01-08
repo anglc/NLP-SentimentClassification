@@ -61,44 +61,7 @@ public class LanguageModel {
 		categoryWordCount.put(c, categoryWordCount.get(c) + total);
 	}
 
-	public String filter(String s) {
-		String fs = "";
-		String[] stmt = s.split("\\.|,|:");
-		for (String ss : stmt) {
-			ArrayList<nGram> t = ModelUtilities.transformNgram(ss, Ngram);
-			TreeMap<nGram, Integer> record = new TreeMap<nGram, Integer>();
-			for (nGram e : t) {
-				int count = 1;
-				if (record.containsKey(e))
-					count = record.get(e) + 1;
-				record.put(e, count);
-			}
-			double maxPwc = -1e+30;
-
-			for (Map.Entry<String, Integer> entry : categoryDataCount
-					.entrySet()) {
-				double Pc, P, count_c, count_w_c;
-				TreeMap<nGram, Integer> S = wordCategory.get(entry.getKey());
-				Pc = (double) entry.getValue() / dataCount;
-				P = Math.log(Pc);
-				count_c = categoryDataCount.get(entry.getKey());
-				for (Map.Entry<nGram, Integer> w : record.entrySet()) {
-					count_w_c = 0;
-					if (S.containsKey(w.getKey()))
-						count_w_c = S.get(w.getKey());
-					P += Math.log((double) (count_w_c + 1)
-							/ (count_c + record.size()));
-				}
-				if (P > maxPwc) {
-					maxPwc = P;
-				}
-			}
-			if (maxPwc > threshold)
-				fs += ss + " . ";
-		}
-		return fs;
-	}
-
+	
 	private double probabilityOfClass(String className, Integer classCount,
 			TreeMap<nGram, Integer> record) {
 		double Pc, P, count_c, count_w_c;

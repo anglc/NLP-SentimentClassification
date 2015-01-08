@@ -6,14 +6,21 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import main.ReturnCell;
+
 public class ModelUtilities {
 	private static TreeMap<String, Integer> renameMap = new TreeMap<String, Integer>();
 	private static TreeMap<Integer, String> invRenameMap = new TreeMap<Integer, String>();
 	private static TreeMap<String, Integer> wordWeight = new TreeMap<String, Integer>();
 
 	public static void addWordWeight(TreeMap<String, Integer> w) {
-		for (Map.Entry<String, Integer> entry : w.entrySet())
-			wordWeight.put(entry.getKey(), entry.getValue());
+		for (Map.Entry<String, Integer> entry : w.entrySet()) {
+			int ww = 0;
+			if (wordWeight.containsKey(entry.getKey()))
+				ww = wordWeight.get(entry.getKey());
+			wordWeight.put(entry.getKey(),
+					Math.abs(ww) + Math.abs(entry.getValue()));
+		}
 	}
 
 	public static int rename(String token) {
@@ -38,6 +45,7 @@ public class ModelUtilities {
 		s = s.replaceAll("'re", " are");
 		s = s.replaceAll("'s", " is");
 		s = s.replaceAll("'m", " am");
+		s = s.replaceAll("'d", " would");
 		s = s.replaceAll("'ve", " have");
 		s = s.replaceAll("'ll", " will");
 		s = s.replaceAll("&", " and ");
@@ -73,6 +81,8 @@ public class ModelUtilities {
 		if (s.equals("are") || s.equals("is") || s.equals("was")
 				|| s.equals("were") || s.equals("am"))
 			return "be";
+		if (s.equals("film"))
+			return "movie";
 		// if (s.equals("no") || s.equals("never") || s.equals("but")||
 		// s.equals("neither"))
 		if (notToken.contains(s))
@@ -107,10 +117,13 @@ public class ModelUtilities {
 		return ret;
 	}
 
-	public static ArrayList<nGram> transformNgram(String s, int n) {
+	public static ArrayList<nGram> transformNgram(String s, int n,
+			ReturnCell<Integer> sentCount, ReturnCell<Integer> tokenCount) {
 		ArrayList<nGram> ret = new ArrayList<nGram>();
 		String[] stmt = s.split("\\.|,|:|;|\\?|!|\\*");
+		int scount = 0, tcount = 0;
 		for (String ss : stmt) {
+			scount++;
 			ss = sieveString(ss);
 			ArrayList<String> tokens = new ArrayList<String>();
 			StringTokenizer st = new StringTokenizer(ss);
@@ -121,16 +134,23 @@ public class ModelUtilities {
 				if (sieveToken(token) && token.length() > 0)
 					tokens.add(token);
 				else {
-					// if (tokens.size() > 0) {
-					// ret.addAll(transfromNgramPhrase(tokens, n));
-					// tokens.clear();
-					// }
+
 				}
 			}
-			if (tokens.size() > 0)
+			if (tokens.size() > 0) {
 				ret.addAll(transfromNgramPhrase(tokens, n));
+				tcount += tokens.size();
+			}
 		}
+		if (sentCount != null)
+			sentCount.set(scount);
+		if (tokenCount != null)
+			tokenCount.set(tcount);
 		return ret;
+	}
+
+	public static ArrayList<nGram> transformNgram(String s, int n) {
+		return transformNgram(s, n, null, null);
 	}
 
 	public static TreeMap<nGram, Integer> getNgramOcc(String s, int n,
@@ -148,23 +168,10 @@ public class ModelUtilities {
 		return ret;
 	}
 
-	public static double[] getCharacteristicVector(String s, int n,
-			ArrayList<nGram> vec) {
-		ArrayList<nGram> t = transformNgram(s, n);
-		TreeSet<nGram> tSet = new TreeSet<nGram>(t);
-		double[] ret = new double[vec.size()];
-		for (int i = 0; i < vec.size(); i++) {
-			if (tSet.contains(vec.get(i)))
-				ret[i] = 1;
-			else
-				ret[i] = 0;
-		}
-		return ret;
-	}
-
 	public static TreeMap<Integer, Double> getCharacteristicWeightVector(
-			String s, int n, TreeMap<nGram, Integer> mixPickPosMap) {
-		ArrayList<nGram> t = transformNgram(s, n);
+			String s, int n, TreeMap<nGram, Integer> mixPickPosMap,
+			ReturnCell<Integer> sentCount, ReturnCell<Integer> tokenCount) {
+		ArrayList<nGram> t = transformNgram(s, n, sentCount, tokenCount);
 		TreeMap<nGram, Integer> tMap = new TreeMap<nGram, Integer>();
 		TreeMap<nGram, Integer> tCountMap = new TreeMap<nGram, Integer>();
 		for (nGram e : t) {
@@ -181,6 +188,8 @@ public class ModelUtilities {
 				double v = e.getValue();
 				ret.put(mixPickPosMap.get(e.getKey()),
 						v + Math.sqrt(tCountMap.get(e.getKey())));
+			} else {
+
 			}
 		}
 		return ret;
@@ -197,7 +206,7 @@ public class ModelUtilities {
 		for (int i = 0; i < e.iWord.length; i++) {
 			String w = getWordName(e.iWord[i]);
 			if (wordWeight.containsKey(w))
-				ret += Math.abs(wordWeight.get(w));
+				ret *= Math.abs(wordWeight.get(w));
 		}
 		return ret;
 	}
@@ -220,56 +229,5 @@ public class ModelUtilities {
 		System.out.printf("\nP  %.2f %%, R  %.2f %%, F1  %.2f %%\n", P * 100,
 				R * 100, F1 * 100);
 		System.out.println();
-	}
-
-	public static ArrayList<nGram> mergePick(ArrayList<nGram> a,
-			ArrayList<nGram> b, int n, TreeSet<nGram> posPickSet,
-			TreeSet<nGram> negPickSet) {
-		SubGramSet subNgram = new SubGramSet();
-		ArrayList<nGram> ret = new ArrayList<nGram>();
-		nGram e = null;
-		int i = 0, j = 0;
-		while (ret.size() < n && i < a.size() && j < b.size()) {
-			e = null;
-			int comp = Double.compare(a.get(i).score, b.get(j).score), from = 0;
-			if (comp == 1 || (comp == 0 && Math.random() > 0.5)) {
-				e = a.get(i);
-				i++;
-				from = 0;
-			} else {
-				e = b.get(j);
-				j++;
-				from = 1;
-			}
-			if (!subNgram.contains(e)) {
-				subNgram.add(e);
-				ret.add(e);
-				if (from == 0)
-					posPickSet.add(e);
-				else
-					negPickSet.add(e);
-			}
-		}
-
-		while (ret.size() < n && i < a.size()) {
-			e = a.get(i);
-			if (!subNgram.contains(e)) {
-				subNgram.add(e);
-				ret.add(e);
-				posPickSet.add(e);
-			}
-			i++;
-		}
-
-		while (ret.size() < n && j < b.size()) {
-			e = b.get(j);
-			if (!subNgram.contains(e)) {
-				subNgram.add(e);
-				ret.add(e);
-				negPickSet.add(e);
-			}
-			j++;
-		}
-		return ret;
 	}
 }
