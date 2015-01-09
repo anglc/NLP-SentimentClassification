@@ -19,5 +19,7 @@ Temporary Items
 
 # classifier output generate
 training_set/output/
+training_set2/output/
+user_test/output/
 bin/
 

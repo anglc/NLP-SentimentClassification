@@ -34,7 +34,43 @@ public class Main {
 
 	public static void main(String[] args) {
 		// Dashboard demo = new Dashboard();
-		work(3, 40000, "training_set");
+		int Ngram = 3, topNgram = 40000;
+		String trainingPath = "training_set", testPath = "user_test";
+		for (int i = 0; i < args.length; i++) {
+			if (args[i].equals("-n")) {
+				try {
+					int v = Integer.parseInt(args[i + 1]);
+					Ngram = v;
+				} catch (Exception e) {
+
+				}
+			}
+			if (args[i].equals("-top")) {
+				try {
+					int v = Integer.parseInt(args[i + 1]);
+					topNgram = v;
+				} catch (Exception e) {
+
+				}
+			}
+			if (args[i].equals("-path")) {
+				try {
+					String v = args[i + 1];
+					trainingPath = v;
+				} catch (Exception e) {
+
+				}
+			}
+			if (args[i].equals("-tpath")) {
+				try {
+					String v = args[i + 1];
+					testPath = v;
+				} catch (Exception e) {
+
+				}
+			}
+		}
+		work(Ngram, topNgram, trainingPath, testPath);
 	}
 
 	public static void stdout(String s, int priority) {
@@ -42,10 +78,11 @@ public class Main {
 			System.out.print(s);
 	}
 
-	public static void work(int Ngram, int topNgram, String trainingPath) {
-		loader = new Loader(trainingPath);
+	public static void work(int Ngram, int topNgram, String trainingPath,
+			String testPath) {
+		loader = new Loader(trainingPath, testPath);
 		ShuffleChooser shuffleChooser = new ShuffleChooser(loader);
-		outputPath = trainingPath + "/output";
+		outputPath = testPath + "/output";
 		System.out.println("## Configuration ##\n");
 		System.out.printf("* Ngram %d\n* topNgram %d\n", Ngram, topNgram);
 
@@ -140,7 +177,7 @@ public class Main {
 		TreeSet<nGram> posPickSet = null, negPickSet = null, mixPickSet = null;
 		TreeMap<nGram, Integer> mixPickPosMap = null;
 		ArrayList<nGram> mixPick = null;
-		shuffleChooser.shuffle(7, 3);
+		shuffleChooser.shuffle(4, 1);
 		posTrain = shuffleChooser.posTrain
 				.toArray(new String[shuffleChooser.posTrain.size()]);
 		negTrain = shuffleChooser.negTrain
@@ -180,7 +217,7 @@ public class Main {
 				posPickSet, negPickSet, mixPickSet, mixPickPosMap);
 
 		retraining(posTrainArticles, negTrainArticles);
-		
+
 		posTest = loader.testPos.toArray(new String[loader.testPos.size()]);
 		negTest = loader.testNeg.toArray(new String[loader.testNeg.size()]);
 

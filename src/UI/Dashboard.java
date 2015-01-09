@@ -75,7 +75,8 @@ public class Dashboard extends JFrame {
 				// TODO Auto-generated method stub
 				topSpinner.requestFocus();
 				JFileChooser chooser = new JFileChooser();
-				chooser.setCurrentDirectory(new java.io.File(trainingField.getText()));
+				chooser.setCurrentDirectory(new java.io.File(trainingField
+						.getText()));
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				int returnVal = chooser.showOpenDialog(null);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -92,7 +93,7 @@ public class Dashboard extends JFrame {
 			}
 
 		});
-		
+
 		consoleField.addFocusListener(new FocusListener() {
 
 			@Override
@@ -100,7 +101,8 @@ public class Dashboard extends JFrame {
 				// TODO Auto-generated method stub
 				topSpinner.requestFocus();
 				JFileChooser chooser = new JFileChooser();
-				chooser.setCurrentDirectory(new java.io.File(consoleField.getText()));
+				chooser.setCurrentDirectory(new java.io.File(consoleField
+						.getText()));
 				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				int returnVal = chooser.showOpenDialog(null);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -117,7 +119,7 @@ public class Dashboard extends JFrame {
 			}
 
 		});
-		
+
 		trainingButton.addActionListener(new ActionListener() {
 
 			@Override
@@ -125,9 +127,9 @@ public class Dashboard extends JFrame {
 				int Ngram = (Integer) ngramSpinner.getValue();
 				int topNgram = (Integer) topSpinner.getValue();
 				String trainingPath = trainingField.getText();
-				Main.work(Ngram, topNgram, trainingPath);
+				// Main.work(Ngram, topNgram, trainingPath);
 			}
-			
+
 		});
 
 		trainingAndtestingRatio.setMajorTickSpacing(2);
@@ -151,7 +153,7 @@ public class Dashboard extends JFrame {
 		fileBlock.add(trainingField);
 		fileBlock.add(new JLabel(" Console log file"));
 		fileBlock.add(consoleField);
-		
+
 		workBlock.setLayout(new BorderLayout());
 		workBlock.add(trainingButton, BorderLayout.EAST);
 

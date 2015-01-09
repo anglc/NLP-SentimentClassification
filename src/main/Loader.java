@@ -29,50 +29,47 @@ public class Loader {
 	 * read path + '/pos' & path + '/neg', single file as one views
 	 * 
 	 * @param path
+	 * @param testPath 
 	 */
-	public Loader(String path) {
+	public Loader(String trainingPath, String testPath) {
 		posViews = new ArrayList<String>();
 		negViews = new ArrayList<String>();
 		testPos = new ArrayList<String>();
 		testNeg = new ArrayList<String>();
-		testUnknown = new ArrayList<String>();
 		testPosName = new ArrayList<String>();
 		testNegName = new ArrayList<String>();
-		testUnknownName = new ArrayList<String>();
 
-		posFolder = new File(path + "/pos");
-		negFolder = new File(path + "/neg");
-		testPosFolder = new File(path + "/user_test/pos");
-		testNegFolder = new File(path + "/user_test/neg");
-		testUnknownFolder = new File(path + "/user_test/unknown");
+		posFolder = new File(trainingPath + "/pos");
+		negFolder = new File(trainingPath + "/neg");
+		testPosFolder = new File(testPath + "/pos");
+		testNegFolder = new File(testPath + "/neg");
 
 		listFilesForFolder(posFolder, 1);
 		listFilesForFolder(negFolder, -1);
 		listFilesForFolder(testPosFolder, 2);
 		listFilesForFolder(testNegFolder, -2);
-		listFilesForFolder(testUnknownFolder, 0);
 
 		// = { "the", "are", "is", "i", "it", "he", "she", "-", "a", "an" }
-		wordFile = new File(path + "/extra/AFINN-111.txt");
+		wordFile = new File(trainingPath + "/extra/AFINN-111.txt");
 		wordWeight = new TreeMap<String, Integer>();
 		storeWordWeight(wordFile);
 		// System.out.printf("AFINN-111.txt = %d\n", wordWeight.size());
 		ModelUtilities.addWordWeight(wordWeight);
 
 //		stopWordsFile = new File(path + "/extra/en.stopnegation-removed.txt");
-		stopWordsFile = new File(path + "/extra/stopwords.txt");
+		stopWordsFile = new File(trainingPath + "/extra/stopwords.txt");
 		stopWords = new TreeSet<String>();
 		storeWords(stopWordsFile, stopWords);
 		ModelUtilities.ignoreToken = stopWords;
 
-		notWordsFile = new File(path + "/extra/negation_not.txt");
+		notWordsFile = new File(trainingPath + "/extra/negation_not.txt");
 		notWords = new TreeSet<String>();
 		storeWords(notWordsFile, notWords);
 		ModelUtilities.notToken = notWords;
 
-		posWordsFile = new File(path + "/extra/pos_word.txt");
+		posWordsFile = new File(trainingPath + "/extra/pos_word.txt");
 		// combineWordsToDoc(posWordsFile, 1);
-		negWordsFile = new File(path + "/extra/neg_word.txt");
+		negWordsFile = new File(trainingPath + "/extra/neg_word.txt");
 		// combineWordsToDoc(negWordsFile, -1);
 	}
 
