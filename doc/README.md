@@ -1,4 +1,4 @@
-# 極性分析 #
+# Polarity Analysis for Sentiment Classification #
 
 ## Stop Word List ##
 
@@ -46,6 +46,7 @@ an
 ```
 `am, are, is, was, were` = `be`
 `no` = `not`
+`film` = `movie`
 ```
 
 更多的口語描述，例如 `uuuuuuuugggggggggglllllllllllyyyyyyy = ugly` 的可能，特別針對 long duplicate word 特別處理，查看濃縮之後，是否會在字典中。狀聲詞 `oh, wow, ah, ...` 可能是一個極性指標，在此就不濾掉這幾個單詞。
@@ -68,7 +69,7 @@ N-grams Bonus = {1, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07};
 
 更多的策略，例如 `(bad, too, null)` 可以視為 `(too, bad, null)`，使用 dag 的方式紀錄 N-grams。
 
-## How to decide K-top ##
+## How To Decide K-top ##
 
 明顯地觀察到，K 越大時，Language Model 越穩定，平均效能穩定，但最好效能可能會下降，對於 Winnow algorithm 或者是 Passive-Aggressive algorithm 來說，feature vector 會非常大，造成在找到合適的參數會消耗更多的時間，並且難在有限的迭代次數中找到好的切平面。
 
@@ -111,15 +112,31 @@ strongClassify(x) 從 training data 中得到 h(x) 的出現的最大值，然�
 
 特別小心公式的計算，雖然有很多乘除法，可以使用 `Math.log` 降下來，防止 overflow 的可能，但同時也會造成嚴重的浮點數誤差。所以使用恰當的 `double` 運算即可，即使遇到 `NaN` 也沒有關係。
 
+論文中提及的公式，額外增加變成
+
+```
+\chi^{2}(t, c) = \frac{N \times (AD - CB)^{2} }{(A+C)\times (B + D) \times (A + B) \times (C + D)} \times Weight[t.getSize()] \times Score(t)
+```
+
+其中，`Weight[t.getSize()]` 正如上述的 `N-grams Bonus`，當最大上為 `n = 5` 時，部分 unigram、bigram 仍然有用。而 `Score(t)` 則是取額外資料中的 `AFINN-111.txt` 單詞正反面的絕對值權重和，有可能正負兩個詞合併成 bigram 來描述更強烈的負面，因此必須取絕對值。
+
+#### Vector ####
+
+選擇 K-top feature n-grams 後，感知機的 Vector 如何放置權重仍然是個困難，從實驗中，單純拿 `n-grams appear times` 作為一個 attribute weight 效果並不好，於是嘗試拿 `Math.log(n-grams appear times)`，但是效果並不好，有可能是浮點數誤差造成的差異並不大，而 `Math.log` 本身就很小，尤其是 `n-grams appear times = 1` 的時候會變成 0，額外加上一個基底 base 來補足也拿以取捨。
+
+最後取用
+
+```
+vector[i] = Score(ngrams(i)) + Math.sqrt(n-grams(i) appear times)
+```
+
+這部分仍然要做實驗，`Score(ngrams(i))` 大約落在 `1 ~ 10` 之間。
+
 #### Process ####
 
 經過幾次的 cross validation 後，每一次會挑到不同的 feature n-grams，藉由交叉驗證得到不同的精準度 P，同時也將挑選的 n-grams 增加 P 的權重，在實驗中總共做了 5 次 cross validation，針對同一組 800 資料，進行 `1 : 1` 的劃分。原本預期挑選 40K 個不同的 n-grams 作為 feature，但是經過 5 次實驗，總共得到 50K 個不同的 n-grams，根據累加的 P 值進行由大排到小，挑選 1/5 的 n-grams 出來，最後挑了少於 10K 個做為 feature。
 
 針對已知的 1600 筆資料進行 `3 : 1` 的劃分，先對數量較多的資料重訓練，隨後才將數量較少放在一起做第二次訓練。防止過度的訓練，導致感知器針對訓練集的已知資訊分配過多的權重，反而針對未知的元素不足以判斷。
-
-## To do ##
-
-增加兩個不在 top feature 中的 attribute，但是在 pos/neg word weight 中的 n-grams 所評分的結果。在量化這些 n-grams 的分數時，不管正反面的強度，一律取絕對值進行加總，有可能一個正面單詞跟一個負面單詞合併在一起來表示一個更強烈的正面或反面資訊。
 
 ## extra data support ##
 
@@ -140,3 +157,6 @@ strongClassify(x) 從 training data 中得到 h(x) 的出現的最大值，然�
 
 列出幾個可能的差異後，從訓練的感知機中得到每一項的權重，由於是線性分類器，權重的大小即可作為是否具有特色，通常差距會達到 10 ~ 100 倍之間。即使從 N-grams score 得到較高的分數，從感知機中會發現到未必是較大的權重，有可能是某幾篇相關的電影所造成的一面倒。
 
+# To Do #
+
+增加兩個不在 top feature 中的 attribute，但是在 pos/neg word weight 中的 n-grams 所評分的結果。在量化這些 n-grams 的分數時，不管正反面的強度，一律取絕對值進行加總，有可能一個正面單詞跟一個負面單詞合併在一起來表示一個更強烈的正面或反面資訊。
