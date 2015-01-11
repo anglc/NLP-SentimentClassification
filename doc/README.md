@@ -157,6 +157,72 @@ vector[i] = Score(ngrams(i)) + Math.sqrt(n-grams(i) appear times)
 
 列出幾個可能的差異後，從訓練的感知機中得到每一項的權重，由於是線性分類器，權重的大小即可作為是否具有特色，通常差距會達到 10 ~ 100 倍之間。即使從 N-grams score 得到較高的分數，從感知機中會發現到未必是較大的權重，有可能是某幾篇相關的電影所造成的一面倒。
 
+## Pseudocode ##
+
+### preprocess ###
+```
+gobal_record(n-grams, score)
+for i  = 0 to CROSS_VALIDATION_MAX
+	shuffle_order(training_data)
+	(ttraining, ttest) = split(training_data, 1 : 1)
+	Vectraining = n-grams_sieve(ttraining)
+	(LM, Winnow, PA) = training(Vectraining)
+	P = test(LM, Winnow, PA, Vectraining)
+	gobal_record.add(P, Vectraining)
+ 
+sort gobal_record(n-grams, score) by descending order.
+shuffle_order(training_data)
+
+(ttraining, tretain) = split(training_data, 4 : 1)
+N-gramsTable = gobel_record.sublist(K)
+Vectraining = parsingInput(ttraining,, N-gramsTable)
+Vecretain= parsingInput(tretain,, N-gramsTable)
+
+(LM, Winnow, PA) = training(Vectraining)
+(LM, Winnow, PA) = retraining(Vecretain)
+
+simpleTest(testdata, LM, Winnow, PA)
+onlineTest(testdata, LM, Winnow, PA)
+```
+
+### online test ###
+
+```
+GROUP_SIZE = 50
+groups = splitEach(testdata, GROUP_SIZE)
+foreach(group : groups)
+	appear set = find(group, N-gramsTable)
+	(LM, Winnow, PA) = retrainingLimited(Vectraining, appear set)
+	foreach(data : group)
+		classify(LM, Winnow, PA, data)	
+```
+
+### fail online test idea ###
+
+```
+GROUP_SIZE = 10
+groups = splitEach(testdata, GROUP_SIZE)
+foreach(group : groups)
+	backtracking 210 possible solution
+		training & test
+		if (better performance)
+			record solution.
+Work, but not helpful.	
+```
+
+### Support N-grams Sieve ###
+
+* AFINN-111.txt  
+The file AFINN-111.txt contains a list of sentiment scores
+* Stop word list  
+Small set, |S| < 20
+* Synonymous “Not” list  
+unused
+* Abbreviation list  
+Rule, |R| < 10
+* No CRF, No Parsing tree, No Subjective filter 
+
+
 # To Do #
 
 增加兩個不在 top feature 中的 attribute，但是在 pos/neg word weight 中的 n-grams 所評分的結果。在量化這些 n-grams 的分數時，不管正反面的強度，一律取絕對值進行加總，有可能一個正面單詞跟一個負面單詞合併在一起來表示一個更強烈的正面或反面資訊。

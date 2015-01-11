@@ -5,9 +5,9 @@
 ## Reference ##
 
 2006 Comparative Experiments on Sentiment Classification for Online Product Reviews.
-Hang Cui, Vibhu Mittal, Mayur Datar[1]
+Hang Cui, Vibhu Mittal, Mayur Datar [here][1]
 
-[1]: (http://dl.acm.org/citation.cfm?id=1597389)
+[1]: http://dl.acm.org/citation.cfm?id=1597389
 
 ## Data Crawler ##
 
@@ -22,10 +22,12 @@ Hang Cui, Vibhu Mittal, Mayur Datar[1]
 
 ## Complete ##
 
-* Simple Passive-Aggressive Algorithm[1]
-* Simple Winnow algorithm[1]
-* Simple Language Modeling[1]
-* Passive-Aggressive Algorithm & Winnow algorithm adjust training[1]
+* Simple Passive-Aggressive Algorithm [here][1]
+* Simple Winnow algorithm [here][1]
+* Simple Language Modeling [here][1]
+* Passive-Aggressive Algorithm & Winnow algorithm adjust training [here][1]
+
+[1]: http://dl.acm.org/citation.cfm?id=1597389
 
 ## Usage ##
 
