@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import main.Article;
 import main.Main;
@@ -133,5 +134,11 @@ public class WinnowMachine implements Classifier {
 			}
 		}
 
+	}
+
+	@Override
+	public void setLimited(TreeSet<Integer> limitSet) {
+		// TODO Auto-generated method stub
+		
 	}
 }

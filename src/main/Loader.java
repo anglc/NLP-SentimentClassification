@@ -5,9 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -16,28 +13,25 @@ import model.nGram;
 
 public class Loader {
 	private File posFolder, negFolder;
-	private File testPosFolder, testNegFolder, testUnknownFolder;
+	private File testPosFolder, testNegFolder;
 	private File wordFile, stopWordsFile, notWordsFile;
-	private File posWordsFile, negWordsFile;
+	// private File posWordsFile, negWordsFile;
 	public TreeMap<String, Integer> wordWeight;
 	public TreeSet<String> stopWords, notWords;
-	public ArrayList<String> posViews, negViews;
-	public ArrayList<String> testPos, testNeg, testUnknown;
-	public ArrayList<String> testPosName, testNegName, testUnknownName;
+	public ArrayList<Article> posViews, negViews;
+	public ArrayList<Article> testPos, testNeg;
 
 	/**
 	 * read path + '/pos' & path + '/neg', single file as one views
 	 * 
 	 * @param path
-	 * @param testPath 
+	 * @param testPath
 	 */
 	public Loader(String trainingPath, String testPath) {
-		posViews = new ArrayList<String>();
-		negViews = new ArrayList<String>();
-		testPos = new ArrayList<String>();
-		testNeg = new ArrayList<String>();
-		testPosName = new ArrayList<String>();
-		testNegName = new ArrayList<String>();
+		posViews = new ArrayList<Article>();
+		negViews = new ArrayList<Article>();
+		testPos = new ArrayList<Article>();
+		testNeg = new ArrayList<Article>();
 
 		posFolder = new File(trainingPath + "/pos");
 		negFolder = new File(trainingPath + "/neg");
@@ -56,7 +50,8 @@ public class Loader {
 		// System.out.printf("AFINN-111.txt = %d\n", wordWeight.size());
 		ModelUtilities.addWordWeight(wordWeight);
 
-//		stopWordsFile = new File(path + "/extra/en.stopnegation-removed.txt");
+		// stopWordsFile = new File(path +
+		// "/extra/en.stopnegation-removed.txt");
 		stopWordsFile = new File(trainingPath + "/extra/stopwords.txt");
 		stopWords = new TreeSet<String>();
 		storeWords(stopWordsFile, stopWords);
@@ -67,9 +62,9 @@ public class Loader {
 		storeWords(notWordsFile, notWords);
 		ModelUtilities.notToken = notWords;
 
-		posWordsFile = new File(trainingPath + "/extra/pos_word.txt");
+		// posWordsFile = new File(trainingPath + "/extra/pos_word.txt");
 		// combineWordsToDoc(posWordsFile, 1);
-		negWordsFile = new File(trainingPath + "/extra/neg_word.txt");
+		// negWordsFile = new File(trainingPath + "/extra/neg_word.txt");
 		// combineWordsToDoc(negWordsFile, -1);
 	}
 
@@ -147,22 +142,16 @@ public class Loader {
 			content = sb.toString();
 			switch (kind) {
 			case 1:
-				posViews.add(content);
+				posViews.add(new Article(content, 1, f.getName()));
 				break;
 			case -1:
-				negViews.add(content);
+				negViews.add(new Article(content, -1, f.getName()));
 				break;
 			case 2:
-				testPos.add(content);
-				testPosName.add(f.getName());
+				testPos.add(new Article(content, 1, f.getName()));
 				break;
 			case -2:
-				testNeg.add(content);
-				testNegName.add(f.getName());
-				break;
-			case 0:
-				testUnknown.add(content);
-				testUnknownName.add(f.getName());
+				testNeg.add(new Article(content, -1, f.getName()));
 				break;
 			}
 			fin.close();

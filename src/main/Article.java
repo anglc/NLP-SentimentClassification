@@ -9,15 +9,20 @@ import model.ModelUtilities;
 import model.nGram;
 
 public class Article {
-	public String content;
-	public int polarity;
+	public String content, fileName;
+	public int polarity, predict_polarity;
 	public int sentCount, tokenCount;
 	public TreeMap<Integer, Double> vec, occVec;
 	public TreeMap<nGram, Integer> occGramVec;
 
-	public Article(String content, int polarity) {
+	public Article(String content, int polarity, String fileName) {
 		this.content = content;
 		this.polarity = polarity;
+		this.fileName = fileName;
+	}
+
+	public Article(String content, int polarity) {
+		this(content, polarity, "");
 	}
 
 	public void preprocess(int Ngram, TreeSet<nGram> posPickSet,
@@ -30,10 +35,10 @@ public class Article {
 				mixPickPosMap, sentCount, tokenCount);
 		occGramVec = ModelUtilities.getNgramOcc(content, Ngram, mixPickPosMap);
 		occVec = new TreeMap<Integer, Double>();
-		
+
 		this.sentCount = sentCount.get();
 		this.tokenCount = tokenCount.get();
-		
+
 		double[] voteArr = new double[5];
 		for (Entry<Integer, Double> e : vec.entrySet()) {
 			int x = e.getKey();

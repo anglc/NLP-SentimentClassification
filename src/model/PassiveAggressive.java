@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import main.Article;
 import main.Main;
@@ -12,6 +13,7 @@ public class PassiveAggressive implements Classifier {
 	public double[] w;
 	public int V;
 	public double selfMin, selfMax;
+	public TreeSet<Integer> limitSet;
 
 	public PassiveAggressive(int V) {
 		this.V = V;
@@ -39,8 +41,10 @@ public class PassiveAggressive implements Classifier {
 		double sum = 0;
 		for (Map.Entry<Integer, Double> e : x.entrySet()) {
 			int i = e.getKey();
-			if (i < w.length)
-				sum += e.getValue() * w[i];
+			if (limitSet == null || limitSet.contains(i)) {
+				if (i < w.length)
+					sum += e.getValue() * w[i];
+			}
 		}
 		return sum;
 	}
@@ -49,8 +53,10 @@ public class PassiveAggressive implements Classifier {
 		double sum = 0;
 		for (Map.Entry<Integer, Double> e : x.entrySet()) {
 			int i = e.getKey();
-			if (i < w.length)
-				sum += e.getValue() * e.getValue();
+			if (limitSet == null || limitSet.contains(i)) {
+				if (i < w.length)
+					sum += e.getValue() * e.getValue();
+			}
 		}
 		return sum;
 	}
@@ -79,8 +85,10 @@ public class PassiveAggressive implements Classifier {
 		for (Map.Entry<Integer, Double> e : x.entrySet()) {
 			// w[i] = w[i] + tau * y * x[i];
 			int i = e.getKey();
-			if (i < w.length)
-				w[i] = w[i] + tau * y * e.getValue();
+			if (limitSet == null || limitSet.contains(i)) {
+				if (i < w.length)
+					w[i] = w[i] + tau * y * e.getValue();
+			}
 		}
 		// for (int i = 0; i < w.length; i++)
 
@@ -118,21 +126,6 @@ public class PassiveAggressive implements Classifier {
 		articles.addAll(posTrainArticles);
 		articles.addAll(negTrainArticles);
 
-		Main.stdout(String.format("\ncomplete |"), 0);
-
-		for (int it = 0; it < Main.ITLIMIT; it++) {
-			if (it % (Main.ITLIMIT / 10) == 0)
-				Main.stdout(String.format(">"), 0);
-			Collections.shuffle(articles);
-			for (int i = 0; i < articles.size(); i++) {
-				if (articles.get(i).polarity > 0) {
-					this.add(articles.get(i).vec, 1);
-				} else {
-					this.add(articles.get(i).vec, -1);
-				}
-			}
-		}
-		Main.stdout(String.format("|\n\n"), 0);
 		Main.stdout(String.format("\ncomplete |"), 0);
 		for (int it = 0; it < Main.ITLIMIT; it++) {
 			if (it % (Main.ITLIMIT / 10) == 0)
@@ -189,5 +182,22 @@ public class PassiveAggressive implements Classifier {
 			}
 		}
 		Main.stdout(String.format("|\n\n"), 0);
+	}
+
+	public PassiveAggressive clone() {
+		PassiveAggressive ret = new PassiveAggressive(this.V);
+		ret.selfMax = this.selfMax;
+		ret.selfMin = this.selfMin;
+		for (int i = 0; i < ret.w.length; i++)
+			ret.w[i] = w[i];
+		return ret;
+	}
+
+	@Override
+	public void setLimited(TreeSet<Integer> limitSet) {
+		if (limitSet == null || limitSet.size() == 0)
+			this.limitSet = null;
+		else
+			this.limitSet = new TreeSet<Integer>(limitSet);
 	}
 }

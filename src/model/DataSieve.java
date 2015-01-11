@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import main.Article;
+
 public class DataSieve {
 	public final static double[] ngramBonus = { 0, 1, 1.01, 1.02, 1.01, 1.02,
 			1.01, 1.02 };
 	private int n;
-	private String[] views, otherViews;
+	private ArrayList<Article> views, otherViews;
 	private TreeMap<nGram, Integer> viewsMap, otherMap; // total appear count
 	private TreeMap<nGram, Integer> viewsCount, otherCount; // #appear in views
 	private ArrayList<nGram> xsquare;
@@ -21,24 +23,17 @@ public class DataSieve {
 	 * 
 	 * @param n
 	 *            n-grams
-	 * @param views
+	 * @param negTrainArticles
 	 *            main class
-	 * @param otherViews
+	 * @param posTrainArticles
 	 *            other class
 	 */
-	public DataSieve(int n, String[] views, String[] otherViews) {
+	public DataSieve(int n, ArrayList<Article> negTrainArticles,
+			ArrayList<Article> posTrainArticles) {
 		this.n = n;
-		this.views = views;
-		this.otherViews = otherViews;
+		this.views = negTrainArticles;
+		this.otherViews = posTrainArticles;
 		sieve();
-	}
-
-	public void setViews(String[] views) {
-		this.views = views;
-	}
-
-	public String[] getViews() {
-		return views;
 	}
 
 	public void storeNgram(ArrayList<nGram> t, int kind) {
@@ -130,13 +125,14 @@ public class DataSieve {
 		viewsCount = new TreeMap<nGram, Integer>();
 		otherCount = new TreeMap<nGram, Integer>();
 
-		for (int i = 0; i < views.length; i++) {
-			ArrayList<nGram> t = ModelUtilities.transformNgram(views[i], n);
+		for (int i = 0; i < views.size(); i++) {
+			ArrayList<nGram> t = ModelUtilities.transformNgram(
+					views.get(i).content, n);
 			storeNgram(t, 1);
 		}
-		for (int i = 0; i < otherViews.length; i++) {
-			ArrayList<nGram> t = ModelUtilities
-					.transformNgram(otherViews[i], n);
+		for (int i = 0; i < otherViews.size(); i++) {
+			ArrayList<nGram> t = ModelUtilities.transformNgram(
+					otherViews.get(i).content, n);
 			storeNgram(t, -1);
 		}
 		ngramCount = viewsMap.size();
@@ -148,8 +144,8 @@ public class DataSieve {
 				B = otherCount.get(entry.getKey());
 			else
 				B = 0;
-			C = views.length - A;
-			D = otherViews.length - B;
+			C = views.size() - A;
+			D = otherViews.size() - B;
 			assert (A + C != 0 && B + D != 0 && A + B != 0 && C + D != 0);
 			nGram e = entry.getKey();
 			double score = entry.getValue() * Math.pow(A * D - C * B, 2)

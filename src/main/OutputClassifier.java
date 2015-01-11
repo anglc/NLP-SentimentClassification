@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import model.Classifier;
 import model.DecisionStump;
 import model.LanguageModel;
-import model.ModelUtilities;
 import model.PassiveAggressive;
 import model.WinnowMachine;
-import model.nGram;
 
 public class OutputClassifier {
 	public static int stdout_status = 1;
@@ -26,19 +23,16 @@ public class OutputClassifier {
 	public static MeasureInfo testMeetingInterview(
 			DecisionStump lv1DecisionTree, PassiveAggressive meetingMachine,
 			LanguageModel LMmachine, WinnowMachine[] MLmachine,
-			PassiveAggressive[] PAmachine, int Ngram, int topNgram,
-			ArrayList<Article> posTrainArticles2,
-			ArrayList<Article> negTrainArticles2) {
-		int vectorSize = (2 + MLmachine.length + PAmachine.length) * 2;
+			PassiveAggressive[] PAmachine, ArrayList<Article> posTestArticles,
+			ArrayList<Article> negTestArticles) {
+		// int vectorSize = (2 + MLmachine.length + PAmachine.length) * 2;
 		int base1 = 2, base2 = 2 + MLmachine.length;
 		ArrayList<TreeMap<Integer, Double>> posVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<TreeMap<Integer, Double>> negVec = new ArrayList<TreeMap<Integer, Double>>();
 
-		int n = posTrainArticles2.size();
-		int m = negTrainArticles2.size();
 		ArrayList<Article> articles = new ArrayList<Article>();
-		articles.addAll(posTrainArticles2);
-		articles.addAll(negTrainArticles2);
+		articles.addAll(posTestArticles);
+		articles.addAll(negTestArticles);
 
 		for (Article article : articles) {
 			double predictW;
@@ -84,54 +78,53 @@ public class OutputClassifier {
 
 		}
 
-		return testClassifier("Adaboost", meetingMachine, posVec, negVec);
+		return testClassifierByVec("Adaboost", meetingMachine, posVec, negVec,
+				posTestArticles, negTestArticles);
 	}
 
 	public static MeasureInfo testSimpleDecision(DecisionStump lv1DecisionTree,
-			ArrayList<Article> posTrainArticles2,
-			ArrayList<Article> negTrainArticles2) {
+			ArrayList<Article> posTestArticles,
+			ArrayList<Article> negTestArticles) {
 		ArrayList<TreeMap<Integer, Double>> posVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<TreeMap<Integer, Double>> negVec = new ArrayList<TreeMap<Integer, Double>>();
-		for (Article pos : posTrainArticles2)
+		for (Article pos : posTestArticles)
 			posVec.add(pos.occVec);
-		for (Article neg : negTrainArticles2)
+		for (Article neg : negTestArticles)
 			negVec.add(neg.occVec);
-		return testClassifier("Simple Decision", lv1DecisionTree, posVec,
-				negVec);
+		return testClassifierByVec("Simple Decision", lv1DecisionTree, posVec,
+				negVec, posTestArticles, negTestArticles);
 	}
 
-	public static MeasureInfo testClassifier(String algName,
-			Classifier classifier, ArrayList<TreeMap<Integer, Double>> posVec,
-			ArrayList<TreeMap<Integer, Double>> negVec) {
-		ArrayList<Integer> posOutput, negOutput;
+	public static MeasureInfo testClassifierByVec(String algName,
+			Classifier classifier,
+			ArrayList<TreeMap<Integer, Double>> posTestVec,
+			ArrayList<TreeMap<Integer, Double>> negTestVec,
+			ArrayList<Article> posTestArticles,
+			ArrayList<Article> negTestArticles) {
 		int[][] tablePos, tableNeg, tableAll;
-
-		posOutput = new ArrayList<Integer>();
-		negOutput = new ArrayList<Integer>();
-
 		tablePos = new int[2][2];
 		tableNeg = new int[2][2];
 		tableAll = new int[2][2];
-		for (TreeMap<Integer, Double> pos : posVec) {
-			if (classifier.classify(pos)) {
+		for (int i = 0; i < posTestArticles.size(); i++) {
+			if (classifier.classify(posTestVec.get(i))) {
 				tableNeg[0][0]++;
 				tablePos[1][1]++;
-				posOutput.add(1);
+				posTestArticles.get(i).predict_polarity = 1;
 			} else {
 				tableNeg[0][1]++;
 				tablePos[1][0]++;
-				posOutput.add(0);
+				posTestArticles.get(i).predict_polarity = 0;
 			}
 		}
-		for (TreeMap<Integer, Double> neg : negVec) {
-			if (classifier.classify(neg)) {
+		for (int i = 0; i < negTestArticles.size(); i++) {
+			if (classifier.classify(negTestVec.get(i))) {
 				tableNeg[1][0]++;
 				tablePos[0][1]++;
-				negOutput.add(1);
+				negTestArticles.get(i).predict_polarity = 1;
 			} else {
 				tableNeg[1][1]++;
 				tablePos[0][0]++;
-				negOutput.add(0);
+				negTestArticles.get(i).predict_polarity = 0;
 			}
 		}
 
@@ -146,20 +139,61 @@ public class OutputClassifier {
 		printTable(algName + " Class Positive", tablePos, posP);
 		printTable(algName + " Class Negative", tableNeg, negP);
 		printTable(algName + " Final", tableAll, null);
-		storeOutputFile(algName, posOutput, negOutput);
+		storeOutputFile(algName, posTestArticles, negTestArticles);
 		MeasureInfo avg = new MeasureInfo(posP.get(), negP.get());
 		return avg;
 	}
 
-	public static MeasureInfo testLMClassifier(ArrayList<nGram> mixPick,
-			LanguageModel LMmachine, ArrayList<Article> posTrainArticles2,
-			ArrayList<Article> negTrainArticles2) {
-		ArrayList<Integer> posOutput, negOutput;
+	public static MeasureInfo testClassifier(String algName,
+			Classifier classifier, ArrayList<Article> posTestArticles2,
+			ArrayList<Article> negTestArticles2) {
 		int[][] tablePos, tableNeg, tableAll;
+		tablePos = new int[2][2];
+		tableNeg = new int[2][2];
+		tableAll = new int[2][2];
+		for (Article pos : posTestArticles2) {
+			if (classifier.classify(pos.vec)) {
+				tableNeg[0][0]++;
+				tablePos[1][1]++;
+				pos.predict_polarity = 1;
+			} else {
+				tableNeg[0][1]++;
+				tablePos[1][0]++;
+				pos.predict_polarity = 0;
+			}
+		}
+		for (Article neg : negTestArticles2) {
+			if (classifier.classify(neg.vec)) {
+				tableNeg[1][0]++;
+				tablePos[0][1]++;
+				neg.predict_polarity = 1;
+			} else {
+				tableNeg[1][1]++;
+				tablePos[0][0]++;
+				neg.predict_polarity = 0;
+			}
+		}
 
-		posOutput = new ArrayList<Integer>();
-		negOutput = new ArrayList<Integer>();
+		for (int i = 0; i < 2; i++)
+			for (int j = 0; j < 2; j++)
+				tableAll[i][j] = tableNeg[i][j] + tablePos[i][j];
 
+		ReturnCell<MeasureInfo> posP = new ReturnCell<MeasureInfo>(
+				new MeasureInfo());
+		ReturnCell<MeasureInfo> negP = new ReturnCell<MeasureInfo>(
+				new MeasureInfo());
+		printTable(algName + " Class Positive", tablePos, posP);
+		printTable(algName + " Class Negative", tableNeg, negP);
+		printTable(algName + " Final", tableAll, null);
+		storeOutputFile(algName, posTestArticles2, negTestArticles2);
+		MeasureInfo avg = new MeasureInfo(posP.get(), negP.get());
+		return avg;
+	}
+
+	public static MeasureInfo testLMClassifier(LanguageModel LMmachine,
+			ArrayList<Article> posTrainArticles2,
+			ArrayList<Article> negTrainArticles2) {
+		int[][] tablePos, tableNeg, tableAll;
 		tablePos = new int[2][2];
 		tableNeg = new int[2][2];
 		tableAll = new int[2][2];
@@ -167,22 +201,22 @@ public class OutputClassifier {
 			if (LMmachine.classify(pos.occGramVec)) {
 				tableNeg[0][0]++;
 				tablePos[1][1]++;
-				posOutput.add(1);
+				pos.predict_polarity = 1;
 			} else {
 				tableNeg[0][1]++;
 				tablePos[1][0]++;
-				posOutput.add(0);
+				pos.predict_polarity = 0;
 			}
 		}
 		for (Article neg : negTrainArticles2) {
 			if (LMmachine.classify(neg.occGramVec)) {
 				tableNeg[1][0]++;
 				tablePos[0][1]++;
-				negOutput.add(1);
+				neg.predict_polarity = 1;
 			} else {
 				tableNeg[1][1]++;
 				tablePos[0][0]++;
-				negOutput.add(0);
+				neg.predict_polarity = 0;
 			}
 		}
 
@@ -198,14 +232,14 @@ public class OutputClassifier {
 		printTable(algName + " Class Positive", tablePos, posP);
 		printTable(algName + " Class Negative", tableNeg, negP);
 		printTable(algName + " Final", tableAll);
-		storeOutputFile(algName, posOutput, negOutput);
+		storeOutputFile(algName, posTrainArticles2, negTrainArticles2);
 
 		MeasureInfo avg = new MeasureInfo(posP.get(), negP.get());
 		return avg;
 	}
 
 	public static void storeOutputFile(String algName,
-			ArrayList<Integer> posOutput, ArrayList<Integer> negOutput) {
+			ArrayList<Article> posOutput, ArrayList<Article> negOutput) {
 
 		try {
 			File A, B;
@@ -215,22 +249,22 @@ public class OutputClassifier {
 			A.getParentFile().mkdirs();
 			B.getParentFile().mkdirs();
 			printWriter = new PrintWriter(A);
-			for (int i = 0; i < posOutput.size(); i++) {
+			for (Article pos : posOutput) {
 				String line = "";
-				if (posOutput.get(i) == 1)
-					line += Main.loader.testPosName.get(i) + " pos";
+				if (pos.predict_polarity == 1)
+					line += pos.fileName + " pos";
 				else
-					line += Main.loader.testPosName.get(i) + " neg";
+					line += pos.fileName + " neg";
 				printWriter.println(line);
 			}
 			printWriter.close();
 			printWriter = new PrintWriter(B);
-			for (int i = 0; i < negOutput.size(); i++) {
+			for (Article neg : negOutput) {
 				String line = "";
-				if (negOutput.get(i) == 1)
-					line += Main.loader.testNegName.get(i) + " pos";
+				if (neg.predict_polarity == 1)
+					line += neg.fileName + " pos";
 				else
-					line += Main.loader.testNegName.get(i) + " neg";
+					line += neg.fileName + " neg";
 				printWriter.println(line);
 			}
 			printWriter.close();

@@ -1,23 +1,22 @@
 package main;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class ShuffleChooser {
-	private Loader loader;
-	public ArrayList<String> posViews, negViews;
-	public List<String> posTrain, negTrain, posTest, negTest;
+	public List<Article> posViews, negViews;
+	public List<Article> posTrain, negTrain, posTest, negTest;
 
-	public ShuffleChooser(Loader loader) {
-		setLoader(loader);
+	public ShuffleChooser(List<Article> posViews) {
+		this.posViews = new ArrayList<Article>(posViews);
+		this.negViews = new ArrayList<Article>();
+		shuffle(1, 1);
 	}
 
-	public void setLoader(Loader loader) {
-		this.loader = loader;
-		this.posViews = loader.posViews;
-		this.negViews = loader.negViews;
+	public ShuffleChooser(List<Article> posViews, List<Article> negViews) {
+		this.posViews = new ArrayList<Article>(posViews);
+		this.negViews = new ArrayList<Article>(negViews);
 		shuffle(1, 1);
 	}
 
