@@ -16,6 +16,9 @@ public class MeasureInfo {
 	}
 
 	public MeasureInfo(MeasureInfo a, MeasureInfo b) {
-		this((a.P + b.P) / 2, (a.R + b.R) / 2);
+		double beta = 1;
+		this.P = (a.P + b.P) / 2;
+		this.R = (a.R + b.R) / 2;
+		this.F1 = (beta * beta + 1) * P * R / (beta * beta * P + R);
 	}
 }

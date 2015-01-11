@@ -89,6 +89,12 @@ public class ModelUtilities {
 			return "not";
 		if (s.equals("u"))
 			return "you";
+		if (s.equals("him"))
+			return "her";
+		if (s.equals("he"))
+			return "she";
+		if (s.equals("him"))
+			return "her";
 		if (s.length() == 1)
 			return "";
 		if (renameMap.containsKey(removeDuplicateCharToken(s)))

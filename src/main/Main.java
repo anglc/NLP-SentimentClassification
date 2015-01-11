@@ -33,7 +33,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		// Dashboard demo = new Dashboard();
-		int Ngram = 3, topNgram = 40000;
+		int Ngram = 4, topNgram = 40000;
 		String trainingPath = "training_set", testPath = "user_test";
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equals("-n")) {
@@ -155,14 +155,18 @@ public class Main {
 		for (int i = 0; i < retainNgramSize && i < ngramScoreArr.size(); i++)
 			retainNgram.add(ngramScoreArr.get(i).getFirst());
 
-		// for (int i = 0; i < 100 && i < ngramScoreArr.size(); i++) {
+		// for (int i = 0, cnt = 0; cnt < 100 && i < ngramScoreArr.size(); i++)
+		// {
 		// nGram e = ngramScoreArr.get(i).getFirst();
+		// if (e.getNonTerminal() == Ngram) {
+		// cnt++;
 		// System.out.printf("Score ( ");
 		// for (int j = 0; j < e.iWord.length; j++) {
-		// System.out
-		// .printf("%s ", ModelUtilities.getWordName(e.iWord[j]));
+		// System.out.printf("%s ",
+		// ModelUtilities.getWordName(e.iWord[j]));
 		// }
 		// System.out.println(")");
+		// }
 		// }
 
 		TreeSet<nGram> posPickSet = null, negPickSet = null, mixPickSet = null;

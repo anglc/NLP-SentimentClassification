@@ -141,6 +141,8 @@ public class OutputClassifier {
 		printTable(algName + " Final", tableAll, null);
 		storeOutputFile(algName, posTestArticles, negTestArticles);
 		MeasureInfo avg = new MeasureInfo(posP.get(), negP.get());
+		stdout(String.format("\nP  %.3f %%, R  %.3f %%, F1  %.3f %%\n\n",
+				avg.P * 100, avg.R * 100, avg.F1 * 100), 1);
 		return avg;
 	}
 
@@ -187,6 +189,8 @@ public class OutputClassifier {
 		printTable(algName + " Final", tableAll, null);
 		storeOutputFile(algName, posTestArticles2, negTestArticles2);
 		MeasureInfo avg = new MeasureInfo(posP.get(), negP.get());
+		stdout(String.format("\nP  %.3f %%, R  %.3f %%, F1  %.3f %%\n\n",
+				avg.P * 100, avg.R * 100, avg.F1 * 100), 1);
 		return avg;
 	}
 
@@ -235,6 +239,8 @@ public class OutputClassifier {
 		storeOutputFile(algName, posTrainArticles2, negTrainArticles2);
 
 		MeasureInfo avg = new MeasureInfo(posP.get(), negP.get());
+		stdout(String.format("\nP  %.3f %%, R  %.3f %%, F1  %.3f %%\n\n",
+				avg.P * 100, avg.R * 100, avg.F1 * 100), 1);
 		return avg;
 	}
 

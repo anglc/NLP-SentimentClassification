@@ -10,8 +10,10 @@ import java.util.TreeSet;
 import main.Article;
 
 public class DataSieve {
-	public final static double[] ngramBonus = { 0, 1, 1.01, 1.02, 1.01, 1.02,
-			1.01, 1.02 };
+	// public final static double[] ngramBonus = { 0, 1, 1.01, 1.02, 1.01, 1.02,
+	// 1.01, 1.02 };
+	public final static double[] ngramBonus = { 0, 0.1, 0.2, 0.3, 0.3, 0.1,
+			0.1, 0.2 };
 	private int n;
 	private ArrayList<Article> views, otherViews;
 	private TreeMap<nGram, Integer> viewsMap, otherMap; // total appear count
