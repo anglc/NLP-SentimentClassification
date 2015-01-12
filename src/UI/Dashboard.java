@@ -181,6 +181,8 @@ public class Dashboard extends JFrame {
 							reportArea.setText("");
 							trainingButton.setText("Working...");
 							trainingButton.setEnabled(false);
+							classifyButton.setEnabled(false);
+							updateButton.setEnabled(false);
 							Main.work(Ngram, topNgram, trainingPath, testPath);
 							classifyButton.setEnabled(true);
 							updateButton.setEnabled(true);
@@ -220,22 +222,6 @@ public class Dashboard extends JFrame {
 						System.out.print("classify :");
 						System.out.println(pos ? " [pos]" : " [neg]");
 						classifyArea.append(pos ? " [pos]" : " [neg]");
-
-						ArrayList<Article> testArticles = new ArrayList<Article>();
-						ReturnCell<PassiveAggressive> PA = new ReturnCell<PassiveAggressive>(
-								null);
-						testArticles.add(new Article(t, 0));
-						Main.preprocessInput(Ngram, testArticles,
-								new ArrayList<Article>(), Main.mixPick,
-								Main.posPickSet, Main.negPickSet,
-								Main.mixPickSet, Main.mixPickPosMap);
-						Main.onlineClassify(Main.posTrainArticles,
-								Main.negTrainArticles, testArticles,
-								new ArrayList<Article>(), PA);
-						boolean online_pos = PA.get().classify(x);
-						System.out.print("online-classify :");
-						System.out.println(online_pos ? " [online-pos]" : " [online-neg]");
-						classifyArea.append(online_pos ? " [online-pos]" : " [online-neg]");
 					}
 					classifyArea.append("\n");
 				}
@@ -246,21 +232,59 @@ public class Dashboard extends JFrame {
 		updateButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				String update[] = classifyArea.getText().toLowerCase()
-						.split("\r?\n");
-				List<String> posTrain = new LinkedList<>();
-				List<String> negTrain = new LinkedList<>();
-				for (String line : update) {
-					if (line.matches(".+ \\[(pos|neg)\\]$")) {
-						String tag = line.substring(line.length() - 4,
-								line.length() - 1);
-						line = line.substring(0, line.length() - 6);
-						if (tag.equals("pos"))
-							posTrain.add(line);
-						else
-							negTrain.add(line);
+				new Thread("update-online"){
+					public void run() {
+						classifyButton.setEnabled(false);
+						updateButton.setEnabled(false);
+						updateButton.setText("Working...");
+						trainingButton.setEnabled(false);
+						
+						String test[] = classifyArea.getText().toLowerCase()
+								.split("\r?\n");
+						int Ngram = (Integer) ngramSpinner.getValue();
+						Classifier classifier = Main.PAmachines[0];
+						classifyArea.setText("");
+						for (String t : test) {
+							if (t.matches(".+ \\[online-(pos|neg)\\]$"))
+								t = t.substring(0, t.length() - 13);
+							if (t.matches(".+ \\[(pos|neg)\\]$"))
+								t = t.substring(0, t.length() - 6);
+							System.out.println("'" + t + "'");
+							classifyArea.append(t);
+							if (!t.isEmpty()) {
+								TreeMap<Integer, Double> x = ModelUtilities
+										.getCharacteristicWeightVector(t, Ngram,
+												Main.mixPickPosMap, null, null);
+								boolean pos = classifier.classify(x);
+								System.out.print("classify :");
+								System.out.println(pos ? " [pos]" : " [neg]");
+								classifyArea.append(pos ? " [pos]" : " [neg]");
+
+								ArrayList<Article> testArticles = new ArrayList<Article>();
+								ReturnCell<PassiveAggressive> PA = new ReturnCell<PassiveAggressive>(
+										null);
+								testArticles.add(new Article(t, 0));
+								Main.preprocessInput(Ngram, testArticles,
+										new ArrayList<Article>(), Main.mixPick,
+										Main.posPickSet, Main.negPickSet,
+										Main.mixPickSet, Main.mixPickPosMap);
+								Main.onlineClassify(Main.posTrainArticles,
+										Main.negTrainArticles, testArticles,
+										new ArrayList<Article>(), PA);
+								boolean online_pos = PA.get().classify(x);
+								System.out.print("online-classify :");
+								System.out.println(online_pos ? " [online-pos]" : " [online-neg]");
+								classifyArea.append(online_pos ? " [online-pos]" : " [online-neg]");
+							}
+							classifyArea.append("\n");
+						}
+
+						classifyButton.setEnabled(true);
+						updateButton.setEnabled(true);
+						updateButton.setText("Update");
+						trainingButton.setEnabled(true);
 					}
-				}
+				}.start();
 			}
 
 		});
