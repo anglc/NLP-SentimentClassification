@@ -37,11 +37,11 @@ public class Main {
 	public static int stdout_status = 1;
 
 	public static void main(String[] args) {
-		if (args.length == 0) {
-			Dashboard demo = new Dashboard();
-			return;
-		}
-		int Ngram = 4, topNgram = 40000;
+//		if (args.length == 0) {
+//			Dashboard demo = new Dashboard();
+//			return;
+//		}
+		int Ngram = 3, topNgram = 40000;
 		String trainingPath = "training_set", testPath = "user_test";
 		for (int i = 0; i < args.length; i++) {
 			if (args[i].equals("-n")) {
