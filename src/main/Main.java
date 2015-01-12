@@ -98,7 +98,7 @@ public class Main {
 		TreeSet<nGram> posPickSet = null, negPickSet = null, mixPickSet = null;
 		TreeMap<nGram, Integer> mixPickPosMap = null;
 		ArrayList<nGram> mixPick = null;
-		for (int cross = 0; cross < 5; cross++) { // 2-fold cross-validation
+		for (int cross = 0; cross < 10; cross++) { // 2-fold cross-validation
 			shuffleChooser.shuffle(1, 1);
 			ShuffleChooser split2 = new ShuffleChooser(shuffleChooser.posTrain,
 					shuffleChooser.negTrain);
@@ -277,14 +277,14 @@ public class Main {
 						appear.add(entry.getKey());
 					}
 				}
-				for (int j = 0; j < 3 && j < posTrainArticles.size(); j++) {
+				for (int j = 0; j < 5 && j < posTrainArticles.size(); j++) {
 					int x = (int) (Math.random() * posTrainArticles.size());
 					Article test = posTrainArticles.get(x);
 					for (Map.Entry<Integer, Double> entry : test.vec.entrySet()) {
 						appear.add(entry.getKey());
 					}
 				}
-				for (int j = 0; j < 3 && j < negTrainArticles.size(); j++) {
+				for (int j = 0; j < 5 && j < negTrainArticles.size(); j++) {
 					int x = (int) (Math.random() * negTrainArticles.size());
 					Article test = negTrainArticles.get(x);
 					for (Map.Entry<Integer, Double> entry : test.vec.entrySet()) {
@@ -310,17 +310,21 @@ public class Main {
 						if (clonePA.classify(e.vec)) {
 							tableNeg[0][0]++;
 							tablePos[1][1]++;
+							e.predict_polarity = 1;
 						} else {
 							tableNeg[0][1]++;
 							tablePos[1][0]++;
+							e.predict_polarity = -1;
 						}
 					} else {
 						if (clonePA.classify(e.vec)) {
 							tableNeg[1][0]++;
 							tablePos[0][1]++;
+							e.predict_polarity = 1;
 						} else {
 							tableNeg[1][1]++;
 							tablePos[0][0]++;
+							e.predict_polarity = -1;
 						}
 					}
 				}
@@ -341,6 +345,7 @@ public class Main {
 		OutputClassifier
 				.printTable(algName + " Class Negative", tableNeg, negP);
 		OutputClassifier.printTable(algName + " Final", tableAll);
+		OutputClassifier.storeOutputFile(algName, posTestArticles, negTestArticles);
 		MeasureInfo avg = new MeasureInfo(posP.get(), negP.get());
 		return avg;
 	}
