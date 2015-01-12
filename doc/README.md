@@ -226,3 +226,9 @@ Rule, |R| < 10
 # To Do #
 
 增加兩個不在 top feature 中的 attribute，但是在 pos/neg word weight 中的 n-grams 所評分的結果。在量化這些 n-grams 的分數時，不管正反面的強度，一律取絕對值進行加總，有可能一個正面單詞跟一個負面單詞合併在一起來表示一個更強烈的正面或反面資訊。
+
+Training Classifier with 5000 subjective and 5000 objective processed sentences.
+
+實作判斷主觀、客觀的分類器。
+
+http://www.cs.cornell.edu/People/pabo/movie-review-data/
