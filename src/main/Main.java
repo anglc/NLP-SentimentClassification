@@ -28,11 +28,19 @@ public class Main {
 	public static DecisionStump lv1DecisionTree;
 	public static Loader loader;
 	public static String outputPath;
+	public static TreeMap<nGram, Integer> mixPickPosMap;
+	public static TreeSet<nGram> posPickSet = null, negPickSet = null,
+			mixPickSet = null;
+	public static ArrayList<Article> posTrainArticles, negTrainArticles;
+	public static ArrayList<nGram> mixPick;
 	public final static int ITLIMIT = 32;
 	public static int stdout_status = 1;
 
 	public static void main(String[] args) {
-		// Dashboard demo = new Dashboard();
+		if (args.length == 0) {
+			Dashboard demo = new Dashboard();
+			return;
+		}
 		int Ngram = 4, topNgram = 40000;
 		String trainingPath = "training_set", testPath = "user_test";
 		for (int i = 0; i < args.length; i++) {
@@ -90,7 +98,7 @@ public class Main {
 		TreeSet<nGram> posPickSet = null, negPickSet = null, mixPickSet = null;
 		TreeMap<nGram, Integer> mixPickPosMap = null;
 		ArrayList<nGram> mixPick = null;
-		for (int cross = 0; cross < 10; cross++) { // 2-fold cross-validation
+		for (int cross = 0; cross < 5; cross++) { // 2-fold cross-validation
 			shuffleChooser.shuffle(1, 1);
 			ShuffleChooser split2 = new ShuffleChooser(shuffleChooser.posTrain,
 					shuffleChooser.negTrain);
@@ -169,9 +177,11 @@ public class Main {
 		// }
 		// }
 
-		TreeSet<nGram> posPickSet = null, negPickSet = null, mixPickSet = null;
-		TreeMap<nGram, Integer> mixPickPosMap = null;
-		ArrayList<nGram> mixPick = null;
+		posPickSet = null;
+		negPickSet = null;
+		mixPickSet = null;
+		mixPickPosMap = null;
+		mixPick = null;
 		shuffleChooser.shuffle(3, 1);
 
 		posPickSet = new TreeSet<nGram>();
@@ -181,7 +191,6 @@ public class Main {
 
 		stdout(String.format("\n# Final Work #\n\n"), 1);
 
-		ArrayList<Article> posTrainArticles, negTrainArticles;
 		ArrayList<Article> posTestArticles, negTestArticles;
 
 		posTrainArticles = new ArrayList<Article>(shuffleChooser.posTrain);
@@ -213,7 +222,7 @@ public class Main {
 				posPickSet, negPickSet, mixPickSet, mixPickPosMap);
 		System.out.printf("performance %f\n\n", performance.P * 100);
 		onlineClassify(posTrainArticles, negTrainArticles, posTestArticles,
-				negTestArticles);
+				negTestArticles, null);
 
 	}
 
@@ -240,7 +249,7 @@ public class Main {
 			ArrayList<Article> posTrainArticles,
 			ArrayList<Article> negTrainArticles,
 			ArrayList<Article> posTestArticles,
-			ArrayList<Article> negTestArticles) {
+			ArrayList<Article> negTestArticles, ReturnCell<PassiveAggressive> PA) {
 		stdout(String.format("\n### Online Classify ###\n\n"), 1);
 		int[][] tablePos, tableNeg, tableAll;
 		tablePos = new int[2][2];
@@ -268,6 +277,20 @@ public class Main {
 						appear.add(entry.getKey());
 					}
 				}
+				for (int j = 0; j < 3 && j < posTrainArticles.size(); j++) {
+					int x = (int) (Math.random() * posTrainArticles.size());
+					Article test = posTrainArticles.get(x);
+					for (Map.Entry<Integer, Double> entry : test.vec.entrySet()) {
+						appear.add(entry.getKey());
+					}
+				}
+				for (int j = 0; j < 3 && j < negTrainArticles.size(); j++) {
+					int x = (int) (Math.random() * negTrainArticles.size());
+					Article test = negTrainArticles.get(x);
+					for (Map.Entry<Integer, Double> entry : test.vec.entrySet()) {
+						appear.add(entry.getKey());
+					}
+				}
 				PassiveAggressive clonePA = PAmachines[0].clone();
 				clonePA.setLimited(appear);
 				for (int it = 0; it < ITLIMIT; it++) {
@@ -280,7 +303,8 @@ public class Main {
 						}
 					}
 				}
-
+				if (PA != null)
+					PA.set(clonePA);
 				for (Article e : group) {
 					if (e.polarity > 0) {
 						if (clonePA.classify(e.vec)) {
