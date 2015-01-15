@@ -34,7 +34,7 @@ public class TrainingConfig {
 	public String trainingPath = "training_set", testPath = "user_test";
 	public String outputPath;
 	public int ITLIMIT = 20, ONLINE_ITLIMIT = 20;
-	public int cross = 10;
+	public int cross = 10, cross_part = 5;
 	public boolean hasUI = false;
 
 	/**
@@ -60,6 +60,22 @@ public class TrainingConfig {
 
 				}
 			}
+			if (args[i].equals("-ittime")) {
+				try {
+					int v = Integer.parseInt(args[i + 1]);
+					ITLIMIT = v;
+				} catch (Exception e) {
+
+				}
+			}
+			if (args[i].equals("-oittime")) {
+				try {
+					int v = Integer.parseInt(args[i + 1]);
+					ONLINE_ITLIMIT = v;
+				} catch (Exception e) {
+
+				}
+			}
 			if (args[i].equals("-top")) {
 				try {
 					int v = Integer.parseInt(args[i + 1]);
@@ -72,6 +88,14 @@ public class TrainingConfig {
 				try {
 					int v = Integer.parseInt(args[i + 1]);
 					cross = v;
+				} catch (Exception e) {
+
+				}
+			}
+			if (args[i].equals("-crosspart")) {
+				try {
+					int v = Integer.parseInt(args[i + 1]);
+					cross_part = v;
 				} catch (Exception e) {
 
 				}
@@ -97,6 +121,7 @@ public class TrainingConfig {
 	}
 
 	public void start() {
+		hasUI = true;
 		if (hasUI) {
 			Dashboard demo = new Dashboard();
 		} else {

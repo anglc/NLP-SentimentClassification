@@ -8,7 +8,7 @@ import model.Article;
 
 public interface Classifier {
 	public static final int DEFAULT_ITLIMIT = 32;
-	
+
 	public boolean classify(TreeMap<Integer, Double> x);
 
 	public void training(ArrayList<Article> posTrainArticles,

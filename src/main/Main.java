@@ -48,7 +48,7 @@ public class Main {
 		 * 2-fold cross-validation
 		 */
 		for (int cross = 0; cross < workConfig.cross; cross++) {
-			shuffleChooser.shuffle(1, 1);
+			shuffleChooser.shuffle(workConfig.cross_part, 5);
 			ShuffleChooser split2 = new ShuffleChooser(shuffleChooser.posTrain,
 					shuffleChooser.negTrain);
 			split2.shuffle(1, 1);
@@ -446,11 +446,11 @@ public class Main {
 				negTrainArticles);
 		stdout(String.format("\n* Winnow Algorithm"), 1);
 		for (int i = 0; i < workConfig.MLmachines.length; i++)
-			workConfig.MLmachines[i] = createWinnow(topNgram, posTrainArticles,
+			workConfig.MLmachines[i] = createWinnow(workConfig, topNgram, posTrainArticles,
 					negTrainArticles);
 		stdout(String.format("\n* Passive-Aggressive Algorithm"), 1);
 		for (int i = 0; i < workConfig.PAmachines.length; i++)
-			workConfig.PAmachines[i] = createPassiveAggressive(topNgram,
+			workConfig.PAmachines[i] = createPassiveAggressive(workConfig, topNgram,
 					posTrainArticles, negTrainArticles);
 		stdout(String.format("\n* Adaboost"), 1);
 		workConfig.meetingMachine = createMeeting(workConfig.LMmachine,
@@ -550,18 +550,20 @@ public class Main {
 		return LMmachine;
 	}
 
-	public static WinnowMachine createWinnow(int topNgram,
+	public static WinnowMachine createWinnow(TrainingConfig workConfig, int topNgram,
 			ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
 		WinnowMachine MLmachine = new WinnowMachine(topNgram);
+		MLmachine.ITLIMIT = workConfig.ITLIMIT;
 		MLmachine.training(posTrainArticles2, negTrainArticles2, 0);
 		return MLmachine;
 	}
 
-	public static PassiveAggressive createPassiveAggressive(int topNgram,
+	public static PassiveAggressive createPassiveAggressive(TrainingConfig workConfig, int topNgram,
 			ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
 		PassiveAggressive PAmachine = new PassiveAggressive(topNgram);
+		PAmachine.ITLIMIT = workConfig.ITLIMIT;
 		PAmachine.training(posTrainArticles2, negTrainArticles2, 0);
 		return PAmachine;
 	}
