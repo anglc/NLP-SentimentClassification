@@ -1,11 +1,11 @@
-package model;
+package model.classifier;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
-import main.Article;
+import model.Article;
+import model.nGram;
 
 public class LanguageModel {
 	/*

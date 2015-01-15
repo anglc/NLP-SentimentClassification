@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import main.Article;
-
 public class DataSieve {
 	// public final static double[] ngramBonus = { 0, 1, 1.01, 1.02, 1.01, 1.02,
 	// 1.01, 1.02 };

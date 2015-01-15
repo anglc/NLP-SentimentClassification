@@ -5,11 +5,14 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import model.Classifier;
-import model.DecisionStump;
-import model.LanguageModel;
-import model.PassiveAggressive;
-import model.WinnowMachine;
+import comp.MeasureInfo;
+import comp.ReturnCell;
+import model.Article;
+import model.classifier.Classifier;
+import model.classifier.DecisionStump;
+import model.classifier.LanguageModel;
+import model.classifier.PassiveAggressive;
+import model.classifier.WinnowMachine;
 
 public class OutputClassifier {
 	public static int stdout_status = 1;
@@ -250,8 +253,10 @@ public class OutputClassifier {
 		try {
 			File A, B;
 			PrintWriter printWriter;
-			A = new File(Main.outputPath + "/pos/" + algName + ".txt");
-			B = new File(Main.outputPath + "/neg/" + algName + ".txt");
+			A = new File(Main.workConfig.outputPath + "/pos/" + algName
+					+ ".txt");
+			B = new File(Main.workConfig.outputPath + "/neg/" + algName
+					+ ".txt");
 			A.getParentFile().mkdirs();
 			B.getParentFile().mkdirs();
 			printWriter = new PrintWriter(A);
@@ -281,7 +286,14 @@ public class OutputClassifier {
 
 	public static void printTable(String tableName, int table[][],
 			ReturnCell<MeasureInfo> retInfo) {
-		stdout(String.format("Table `%s`\n", tableName), 1);
+		double P, R, F1, beta = 1;
+		P = (double) table[1][1] / (table[1][0] + table[1][1]);
+		R = (double) table[1][1] / (table[0][1] + table[1][1]);
+		F1 = (beta * beta + 1) * P * R / (beta * beta * P + R);
+
+		stdout(String.format(
+				"Table `%s` P  %.3f %%, R  %.3f %%, F1  %.3f %%\n", tableName,
+				P * 100, R * 100, F1 * 100), 1);
 		stdout(String.format("\n|%16s|%15s|%15s|\n", "Truth\\Classifier",
 				"Classifier no", "Classifier yes"), 0);
 		stdout(String.format("|%16s|%15s|%15s|\n", "----------------",
@@ -291,13 +303,6 @@ public class OutputClassifier {
 		stdout(String.format("|%16s|%15d|%15d|\n", "Truth yes", table[1][0],
 				table[1][1]), 0);
 
-		double P, R, F1, beta = 1;
-		P = (double) table[1][1] / (table[1][0] + table[1][1]);
-		R = (double) table[1][1] / (table[0][1] + table[1][1]);
-		F1 = (beta * beta + 1) * P * R / (beta * beta * P + R);
-
-		stdout(String.format("\nP  %.3f %%, R  %.3f %%, F1  %.3f %%\n\n",
-				P * 100, R * 100, F1 * 100), 1);
 		if (retInfo != null)
 			retInfo.set(new MeasureInfo(P, R));
 	}

@@ -1,4 +1,4 @@
-package model;
+package model.classifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,13 +6,14 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import main.Article;
 import main.Main;
+import model.Article;
 
 public class WinnowMachine implements Classifier {
 	public double[] f;
 	public double threshold;
 	public int V;
+	public int ITLIMIT;
 	public double selfMin, selfMax;
 
 	public WinnowMachine(int V) {
@@ -20,6 +21,7 @@ public class WinnowMachine implements Classifier {
 		threshold = V / 512;
 		init();
 		initSelfTraining();
+		this.ITLIMIT = DEFAULT_ITLIMIT;
 	}
 
 	public void init() {
@@ -111,8 +113,8 @@ public class WinnowMachine implements Classifier {
 		articles.addAll(negTrainArticles);
 		Main.stdout(String.format("\ncomplete |"), 0);
 
-		for (int it = 0; it < Main.ITLIMIT; it++) {
-			if (it % (Main.ITLIMIT / 10) == 0)
+		for (int it = 0; it < ITLIMIT; it++) {
+			if (it % (ITLIMIT / 10) == 0)
 				Main.stdout(String.format(">"), 0);
 			Collections.shuffle(articles);
 			for (int i = 0; i < articles.size(); i++) {
@@ -139,6 +141,6 @@ public class WinnowMachine implements Classifier {
 	@Override
 	public void setLimited(TreeSet<Integer> limitSet) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

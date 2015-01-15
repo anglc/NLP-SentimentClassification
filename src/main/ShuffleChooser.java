@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import model.Article;
+
 public class ShuffleChooser {
 	public List<Article> posViews, negViews;
 	public List<Article> posTrain, negTrain, posTest, negTest;

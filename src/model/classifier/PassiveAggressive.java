@@ -1,4 +1,4 @@
-package model;
+package model.classifier;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,12 +6,13 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import main.Article;
 import main.Main;
+import model.Article;
 
 public class PassiveAggressive implements Classifier {
 	public double[] w;
 	public int V;
+	public int ITLIMIT;
 	public double selfMin, selfMax;
 	public TreeSet<Integer> limitSet;
 
@@ -19,6 +20,7 @@ public class PassiveAggressive implements Classifier {
 		this.V = V;
 		init();
 		initSelfTraining();
+		this.ITLIMIT = DEFAULT_ITLIMIT;
 	}
 
 	public void init() {
@@ -127,8 +129,8 @@ public class PassiveAggressive implements Classifier {
 		articles.addAll(negTrainArticles);
 
 		Main.stdout(String.format("\ncomplete |"), 0);
-		for (int it = 0; it < Main.ITLIMIT; it++) {
-			if (it % (Main.ITLIMIT / 10) == 0)
+		for (int it = 0; it < ITLIMIT; it++) {
+			if (it % (ITLIMIT / 10) == 0)
 				Main.stdout(String.format(">"), 0);
 			Collections.shuffle(articles);
 			for (int i = 0; i < articles.size(); i++) {
@@ -167,8 +169,8 @@ public class PassiveAggressive implements Classifier {
 			ArrayList<TreeMap<Integer, Double>> voteNegVec) {
 		Main.stdout(String.format("\ncomplete |"), 0);
 		int ratio = 10;
-		for (int it = 0; it < Main.ITLIMIT * ratio; it++) {
-			if (it % (Main.ITLIMIT * ratio / 10) == 0)
+		for (int it = 0; it < ITLIMIT * ratio; it++) {
+			if (it % (ITLIMIT * ratio / 10) == 0)
 				Main.stdout(String.format(">"), 0);
 			int posIdx = 0, negIdx = 0;
 			while (posIdx < votePosVec.size() || negIdx < voteNegVec.size()) {

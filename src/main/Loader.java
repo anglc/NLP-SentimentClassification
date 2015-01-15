@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import model.Article;
 import model.ModelUtilities;
 import model.nGram;
 
@@ -15,9 +16,9 @@ public class Loader {
 	private File posFolder, negFolder;
 	private File testPosFolder, testNegFolder;
 	private File wordFile, stopWordsFile, notWordsFile;
-	// private File posWordsFile, negWordsFile;
+	private File posWordsFile, negWordsFile;
 	public TreeMap<String, Integer> wordWeight;
-	public TreeSet<String> stopWords, notWords;
+	public TreeSet<String> stopWords, notWords, posWords, negWords;
 	public ArrayList<Article> posViews, negViews;
 	public ArrayList<Article> testPos, testNeg;
 
@@ -47,11 +48,8 @@ public class Loader {
 		wordFile = new File(trainingPath + "/extra/AFINN-111.txt");
 		wordWeight = new TreeMap<String, Integer>();
 		storeWordWeight(wordFile);
-		// System.out.printf("AFINN-111.txt = %d\n", wordWeight.size());
 		ModelUtilities.addWordWeight(wordWeight);
 
-		// stopWordsFile = new File(path +
-		// "/extra/en.stopnegation-removed.txt");
 		stopWordsFile = new File(trainingPath + "/extra/stopwords.txt");
 		stopWords = new TreeSet<String>();
 		storeWords(stopWordsFile, stopWords);
@@ -62,32 +60,15 @@ public class Loader {
 		storeWords(notWordsFile, notWords);
 		ModelUtilities.notToken = notWords;
 
-		// posWordsFile = new File(trainingPath + "/extra/pos_word.txt");
-		// combineWordsToDoc(posWordsFile, 1);
-		// negWordsFile = new File(trainingPath + "/extra/neg_word.txt");
-		// combineWordsToDoc(negWordsFile, -1);
+		posWordsFile = new File(trainingPath + "/extra/pos_word.txt");
+		posWords = new TreeSet<String>();
+		storeWords(posWordsFile, posWords);
+		
+		negWordsFile = new File(trainingPath + "/extra/neg_word.txt");
+		negWords = new TreeSet<String>();
+		storeWords(negWordsFile, negWords);
 	}
 
-	public void combineWordsToDoc(File f, int kind) {
-		if (f != null && f.getName().charAt(0) == '.')
-			return;
-		TreeMap<String, Integer> wordWeight = new TreeMap<String, Integer>();
-		try {
-			BufferedReader fin = new BufferedReader(new FileReader(f));
-			String line;
-			while ((line = fin.readLine()) != null) {
-				String[] s = line.split("\\s+");
-				if (s.length != 1)
-					continue;
-				String word = s[0];
-				wordWeight.put(word, kind);
-			}
-			fin.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		ModelUtilities.addWordWeight(wordWeight);
-	}
 
 	public void storeWordWeight(File f) {
 		if (f != null && f.getName().charAt(0) == '.')
@@ -175,7 +156,7 @@ public class Loader {
 		try {
 			File A;
 			PrintWriter printWriter;
-			A = new File(Main.outputPath + "/feature/ngram.txt");
+			A = new File(Main.workConfig.outputPath + "/feature/ngram.txt");
 			A.getParentFile().mkdirs();
 
 			printWriter = new PrintWriter(A);

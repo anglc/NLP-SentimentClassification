@@ -9,19 +9,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.TreeMap;
 
 import javax.swing.BorderFactory;
@@ -40,13 +33,12 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
-import main.Article;
+import comp.ReturnCell;
 import main.Main;
-import main.ReturnCell;
-import model.Classifier;
+import model.Article;
 import model.ModelUtilities;
-import model.PassiveAggressive;
-import model.nGram;
+import model.classifier.Classifier;
+import model.classifier.PassiveAggressive;
 
 public class Dashboard extends JFrame {
 	SpinnerModel ngramModel;
@@ -183,7 +175,7 @@ public class Dashboard extends JFrame {
 							trainingButton.setEnabled(false);
 							classifyButton.setEnabled(false);
 							updateButton.setEnabled(false);
-							Main.work(Ngram, topNgram, trainingPath, testPath);
+							Main.work(Main.workConfig);
 							classifyButton.setEnabled(true);
 							updateButton.setEnabled(true);
 							System.out.println("## Ready for testing ##");
@@ -205,7 +197,7 @@ public class Dashboard extends JFrame {
 				String test[] = classifyArea.getText().toLowerCase()
 						.split("\r?\n");
 				int Ngram = (Integer) ngramSpinner.getValue();
-				Classifier classifier = Main.PAmachines[0];
+				Classifier classifier = Main.workConfig.PAmachines[0];
 				classifyArea.setText("");
 				for (String t : test) {
 					if (t.matches(".+ \\[online-(pos|neg)\\]$"))
@@ -217,7 +209,7 @@ public class Dashboard extends JFrame {
 					if (!t.isEmpty()) {
 						TreeMap<Integer, Double> x = ModelUtilities
 								.getCharacteristicWeightVector(t, Ngram,
-										Main.mixPickPosMap, null, null);
+										Main.workConfig.mixPickPosMap, null, null);
 						boolean pos = classifier.classify(x);
 						System.out.print("classify :");
 						System.out.println(pos ? " [pos]" : " [neg]");
@@ -242,7 +234,7 @@ public class Dashboard extends JFrame {
 						String test[] = classifyArea.getText().toLowerCase()
 								.split("\r?\n");
 						int Ngram = (Integer) ngramSpinner.getValue();
-						Classifier classifier = Main.PAmachines[0];
+						Classifier classifier = Main.workConfig.PAmachines[0];
 						classifyArea.setText("");
 						for (String t : test) {
 							if (t.matches(".+ \\[online-(pos|neg)\\]$"))
@@ -254,7 +246,7 @@ public class Dashboard extends JFrame {
 							if (!t.isEmpty()) {
 								TreeMap<Integer, Double> x = ModelUtilities
 										.getCharacteristicWeightVector(t, Ngram,
-												Main.mixPickPosMap, null, null);
+												Main.workConfig.mixPickPosMap, null, null);
 								boolean pos = classifier.classify(x);
 								System.out.print("classify :");
 								System.out.println(pos ? " [pos]" : " [neg]");
@@ -265,11 +257,11 @@ public class Dashboard extends JFrame {
 										null);
 								testArticles.add(new Article(t, 0));
 								Main.preprocessInput(Ngram, testArticles,
-										new ArrayList<Article>(), Main.mixPick,
-										Main.posPickSet, Main.negPickSet,
-										Main.mixPickSet, Main.mixPickPosMap);
-								Main.onlineClassify(Main.posTrainArticles,
-										Main.negTrainArticles, testArticles,
+										new ArrayList<Article>(), Main.workConfig.mixPick,
+										Main.workConfig.posPickSet, Main.workConfig.negPickSet,
+										Main.workConfig.mixPickSet, Main.workConfig.mixPickPosMap);
+								Main.onlineClassify(Main.workConfig, Main.workConfig.posTrainArticles,
+										Main.workConfig.negTrainArticles, testArticles,
 										new ArrayList<Article>(), PA);
 								boolean online_pos = PA.get().classify(x);
 								System.out.print("online-classify :");

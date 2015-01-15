@@ -1,6 +1,5 @@
-package model;
+package model.classifier;
 
-import java.util.TreeMap;
 
 public class DecisionStump extends PassiveAggressive {
 

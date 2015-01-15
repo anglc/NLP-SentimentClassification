@@ -1,12 +1,14 @@
-package model;
+package model.classifier;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import main.Article;
+import model.Article;
 
 public interface Classifier {
+	public static final int DEFAULT_ITLIMIT = 32;
+	
 	public boolean classify(TreeMap<Integer, Double> x);
 
 	public void training(ArrayList<Article> posTrainArticles,

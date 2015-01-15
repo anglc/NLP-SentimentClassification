@@ -1,12 +1,11 @@
-package main;
+package model;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 
-import model.ModelUtilities;
-import model.nGram;
+import comp.ReturnCell;
 
 public class Article {
 	public String content, fileName;

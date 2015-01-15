@@ -6,7 +6,7 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import main.ReturnCell;
+import comp.ReturnCell;
 
 public class ModelUtilities {
 	private static TreeMap<String, Integer> renameMap = new TreeMap<String, Integer>();
