@@ -23,7 +23,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		workConfig = new TrainingConfig(args);
-		work(workConfig);
+		workConfig.start();
 	}
 
 	public static void stdout(String s, int priority) {
@@ -76,9 +76,8 @@ public class Main {
 			MeasureInfo performance;
 
 			performance = processTestInput(workConfig, workConfig.Ngram,
-					posTrainArticles, negTrainArticles, posTestArticles,
-					negTestArticles, mixPick, posPickSet, negPickSet,
-					mixPickSet, mixPickPosMap);
+					posTestArticles, negTestArticles, mixPick, posPickSet,
+					negPickSet, mixPickSet, mixPickPosMap);
 
 			System.out.printf("performance %f\n\n", performance.P * 100);
 
@@ -96,6 +95,7 @@ public class Main {
 	}
 
 	/**
+	 * classify test data
 	 * 
 	 * @param workConfig
 	 * @param loader
@@ -171,19 +171,31 @@ public class Main {
 
 		MeasureInfo performance;
 		performance = processTestInput(workConfig, workConfig.Ngram,
-				posTrainArticles, negTrainArticles, posTestArticles,
-				negTestArticles, mixPick, posPickSet, negPickSet, mixPickSet,
-				mixPickPosMap);
+				posTestArticles, negTestArticles, mixPick, posPickSet,
+				negPickSet, mixPickSet, mixPickPosMap);
 		System.out.printf("performance %f\n\n", performance.P * 100);
 		onlineClassify(workConfig, posTrainArticles, negTrainArticles,
 				posTestArticles, negTestArticles, null);
 
 	}
 
+	/**
+	 * call preprocessInput() preprocess pos, neg-items to vector before call
+	 * singleClassify() to offline classify.
+	 * 
+	 * @param workConfig
+	 * @param Ngram
+	 * @param posTestArticles
+	 * @param negTestArticles
+	 * @param mixPick
+	 * @param posPickSet
+	 * @param negPickSet
+	 * @param mixPickSet
+	 * @param mixPickPosMap
+	 * @return
+	 */
 	public static MeasureInfo processTestInput(TrainingConfig workConfig,
-			int Ngram, ArrayList<Article> posTrainArticles,
-			ArrayList<Article> negTrainArticles,
-			ArrayList<Article> posTestArticles,
+			int Ngram, ArrayList<Article> posTestArticles,
 			ArrayList<Article> negTestArticles, ArrayList<nGram> mixPick,
 			TreeSet<nGram> posPickSet, TreeSet<nGram> negPickSet,
 			TreeSet<nGram> mixPickSet, TreeMap<nGram, Integer> mixPickPosMap) {
@@ -200,6 +212,17 @@ public class Main {
 		return performance;
 	}
 
+	/**
+	 * online-test will depend with appear set which the feature of test input.
+	 * 
+	 * @param workConfig
+	 * @param posTrainArticles
+	 * @param negTrainArticles
+	 * @param posTestArticles
+	 * @param negTestArticles
+	 * @param PA
+	 * @return
+	 */
 	public static MeasureInfo onlineClassify(TrainingConfig workConfig,
 			ArrayList<Article> posTrainArticles,
 			ArrayList<Article> negTrainArticles,
@@ -305,6 +328,14 @@ public class Main {
 		return avg;
 	}
 
+	/**
+	 * offline classify. use all training model to classify in linear time.
+	 * 
+	 * @param workConfig
+	 * @param posTestArticles2
+	 * @param negTestArticles2
+	 * @return
+	 */
 	public static MeasureInfo singleClassify(TrainingConfig workConfig,
 			ArrayList<Article> posTestArticles2,
 			ArrayList<Article> negTestArticles2) {
@@ -344,6 +375,22 @@ public class Main {
 		return best;
 	}
 
+	/**
+	 * parsing all text data to n-grams, then using feature formula to pick
+	 * K-top feature. Finally, get classifier by training data.
+	 * 
+	 * @param workConfig
+	 * @param Ngram
+	 * @param topNgram
+	 * @param posTrainArticles
+	 * @param negTrainArticles
+	 * @param posPickSet
+	 * @param negPickSet
+	 * @param mixPickSet
+	 * @param mixPickPosMap
+	 * @param retainNgram
+	 * @return
+	 */
 	public static ArrayList<nGram> experiment(TrainingConfig workConfig,
 			int Ngram, int topNgram, ArrayList<Article> posTrainArticles,
 			ArrayList<Article> negTrainArticles, TreeSet<nGram> posPickSet,
@@ -413,6 +460,18 @@ public class Main {
 		return mixPick;
 	}
 
+	/**
+	 * parsing text by known feature n-grams list, transfer them to vector.
+	 * 
+	 * @param Ngram
+	 * @param posTrainArticles
+	 * @param negTrainArticles
+	 * @param mixPick
+	 * @param posPickSet
+	 * @param negPickSet
+	 * @param mixPickSet
+	 * @param mixPickPosMap
+	 */
 	public static void preprocessInput(int Ngram,
 			ArrayList<Article> posTrainArticles,
 			ArrayList<Article> negTrainArticles, ArrayList<nGram> mixPick,

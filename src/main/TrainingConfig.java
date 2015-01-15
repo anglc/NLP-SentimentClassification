@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import UI.Dashboard;
 import model.Article;
 import model.ModelUtilities;
 import model.nGram;
@@ -34,6 +35,7 @@ public class TrainingConfig {
 	public String outputPath;
 	public int ITLIMIT = 20, ONLINE_ITLIMIT = 20;
 	public int cross = 10;
+	public boolean hasUI = false;
 
 	/**
 	 * build in user training
@@ -47,6 +49,9 @@ public class TrainingConfig {
 	 */
 	public TrainingConfig(String[] args) {
 		for (int i = 0; args != null && i < args.length; i++) {
+			if (args[i].equals("-ui")) {
+				hasUI = true;
+			}
 			if (args[i].equals("-n")) {
 				try {
 					int v = Integer.parseInt(args[i + 1]);
@@ -59,6 +64,14 @@ public class TrainingConfig {
 				try {
 					int v = Integer.parseInt(args[i + 1]);
 					topNgram = v;
+				} catch (Exception e) {
+
+				}
+			}
+			if (args[i].equals("-cross")) {
+				try {
+					int v = Integer.parseInt(args[i + 1]);
+					cross = v;
 				} catch (Exception e) {
 
 				}
@@ -81,6 +94,14 @@ public class TrainingConfig {
 			}
 		}
 		outputPath = testPath + "/output";
+	}
+
+	public void start() {
+		if (hasUI) {
+			Dashboard demo = new Dashboard();
+		} else {
+			Main.work(this);
+		}
 	}
 
 	public void setSupportDS(TreeSet<nGram> posPickSet2,
