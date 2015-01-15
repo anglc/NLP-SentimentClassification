@@ -3,6 +3,8 @@ package model;
 import java.util.Arrays;
 
 public class nGram implements Comparable<Object> {
+	public static final nGram POS = new nGram(new int[]{-2, -2, -2});
+	public static final nGram NEG = new nGram(new int[]{-3, -3, -3});
 	public String[] sWord;
 	public int[] iWord;
 	public double score;

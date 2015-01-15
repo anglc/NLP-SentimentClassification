@@ -44,7 +44,7 @@ public class Loader {
 		listFilesForFolder(testPosFolder, 2);
 		listFilesForFolder(testNegFolder, -2);
 
-		// = { "the", "are", "is", "i", "it", "he", "she", "-", "a", "an" }
+		// = { "the", "are", "is", "it", "he", "she", "-", "a", "an" }
 		wordFile = new File(trainingPath + "/extra/AFINN-111.txt");
 		wordWeight = new TreeMap<String, Integer>();
 		storeWordWeight(wordFile);
@@ -63,10 +63,12 @@ public class Loader {
 		posWordsFile = new File(trainingPath + "/extra/pos_word.txt");
 		posWords = new TreeSet<String>();
 		storeWords(posWordsFile, posWords);
+		ModelUtilities.posToken = posWords;
 		
 		negWordsFile = new File(trainingPath + "/extra/neg_word.txt");
 		negWords = new TreeSet<String>();
 		storeWords(negWordsFile, negWords);
+		ModelUtilities.negToken = negWords;
 	}
 
 

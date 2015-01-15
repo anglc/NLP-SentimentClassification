@@ -327,7 +327,6 @@ public class Main {
 			worst = worst.min(tmp);
 			avg = avg.add(tmp);
 		}
-
 		for (int i = 0; i < workConfig.PAmachines.length; i++) {
 			tmp = OutputClassifier.testClassifier("Passive-Aggressive",
 					workConfig.PAmachines[i], posTestArticles2,
@@ -336,20 +335,13 @@ public class Main {
 			worst = worst.min(tmp);
 			avg = avg.add(tmp);
 		}
-
-		// tmp = OutputClassifier.testSimpleDecision(lv1DecisionTree,
-		// posTestArticles2, negTestArticles2);
-		// best.P = Math.max(best.P, tmp.P);
-		// worst.P = Math.min(worst.P, tmp.P);
-		// avg.P += tmp.P;
-		tmp = OutputClassifier.testMeetingInterview(workConfig.lv1DecisionTree,
-				workConfig.meetingMachine, workConfig.LMmachine,
-				workConfig.MLmachines, workConfig.PAmachines, posTestArticles2,
-				negTestArticles2);
+		tmp = OutputClassifier.testMeetingInterview(workConfig.meetingMachine,
+				workConfig.LMmachine, workConfig.MLmachines,
+				workConfig.PAmachines, posTestArticles2, negTestArticles2);
 		best = best.max(tmp);
 		worst = worst.min(tmp);
 		avg = avg.add(tmp);
-		avg.P /= (2 + workConfig.MLmachines.length + workConfig.PAmachines.length);
+		avg.P /= (1 + workConfig.MLmachines.length + workConfig.PAmachines.length);
 		return best;
 	}
 
@@ -365,17 +357,12 @@ public class Main {
 		DataSieve posSieve = new DataSieve(Ngram, posTrainArticles,
 				negTrainArticles);
 
-		// posSieve.printBestNgram(20);
-		// System.exit(0);
-
 		stdout(String.format("* negative sieve %d-grams building ...\n", Ngram),
 				1);
 
 		DataSieve negSieve = new DataSieve(Ngram, negTrainArticles,
 				posTrainArticles);
 
-		// negSieve.printBestNgram(20);
-		// System.exit(0);
 		stdout(String.format("* positive #ngram %d\n", posSieve.ngramCount), 1);
 		stdout(String.format("* negative #ngram %d\n", negSieve.ngramCount), 1);
 
@@ -392,6 +379,12 @@ public class Main {
 			mixPickPosMap.put(mixPick.get(i), i);
 			mixPickSet.add(mixPick.get(i));
 		}
+
+		mixPickPosMap.put(nGram.POS, mixPick.size());
+		mixPickSet.add(nGram.POS);
+		mixPickPosMap.put(nGram.NEG, mixPick.size() + 1);
+		mixPickSet.add(nGram.NEG);
+
 		topNgram = mixPick.size();
 
 		stdout(String.format("* actual #top-Ngrams %d\n", topNgram), 1);
@@ -402,9 +395,6 @@ public class Main {
 		workConfig.MLmachines = new WinnowMachine[2];
 		workConfig.PAmachines = new PassiveAggressive[2];
 
-		stdout(String.format("\n* Simple Decision"), 1);
-		workConfig.lv1DecisionTree = createSimpleDecision(posTrainArticles,
-				negTrainArticles);
 		stdout(String.format("\n* Language Model"), 1);
 		workConfig.LMmachine = createLanguageModel(Ngram, posTrainArticles,
 				negTrainArticles);
@@ -418,9 +408,8 @@ public class Main {
 					posTrainArticles, negTrainArticles);
 		stdout(String.format("\n* Adaboost"), 1);
 		workConfig.meetingMachine = createMeeting(workConfig.LMmachine,
-				workConfig.MLmachines, workConfig.PAmachines,
-				workConfig.lv1DecisionTree, Ngram, topNgram, mixPick,
-				posTrainArticles, negTrainArticles);
+				workConfig.MLmachines, workConfig.PAmachines, Ngram, topNgram,
+				mixPick, posTrainArticles, negTrainArticles);
 		stdout(String.format("\n\n"), 1);
 		return mixPick;
 	}
@@ -452,11 +441,11 @@ public class Main {
 
 	public static PassiveAggressive createMeeting(LanguageModel LMmachine,
 			WinnowMachine[] MLmachine2, PassiveAggressive[] PAmachine2,
-			DecisionStump lv1DecisionTree, int Ngram, int topNgram,
-			ArrayList<nGram> mixPick, ArrayList<Article> posTrainArticles2,
+			int Ngram, int topNgram, ArrayList<nGram> mixPick,
+			ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
-		int vectorSize = (2 + MLmachine2.length + PAmachine2.length) * 2;
-		int base1 = 2, base2 = 2 + MLmachine2.length;
+		int vectorSize = (1 + MLmachine2.length + PAmachine2.length) * 2;
+		int base1 = 1, base2 = 1 + MLmachine2.length;
 		PassiveAggressive meetingMachine = new PassiveAggressive(vectorSize);
 		ArrayList<TreeMap<Integer, Double>> votePosVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<TreeMap<Integer, Double>> voteNegVec = new ArrayList<TreeMap<Integer, Double>>();
@@ -475,13 +464,6 @@ public class Main {
 				voteVec.put(0 * 2, predictW);
 			else
 				voteVec.put(0 * 2 + 1, predictW);
-
-			predict = lv1DecisionTree.classify(article.occVec);
-			predictW = 0;
-			if (predict)
-				voteVec.put(1 * 2, predictW);
-			else
-				voteVec.put(1 * 2 + 1, predictW);
 
 			for (int j = 0; j < MLmachine2.length; j++) {
 				predict = MLmachine2[j].classify(article.vec);
@@ -534,6 +516,13 @@ public class Main {
 		return PAmachine;
 	}
 
+	/**
+	 * void overfitting, need retraining by another data.
+	 * 
+	 * @param workConfig
+	 * @param posTrainArticles2
+	 * @param negTrainArticles2
+	 */
 	public static void retraining(TrainingConfig workConfig,
 			ArrayList<Article> posTrainArticles2,
 			ArrayList<Article> negTrainArticles2) {
@@ -543,10 +532,8 @@ public class Main {
 		for (WinnowMachine MLmachine : workConfig.MLmachines) {
 			MLmachine.training(posTrainArticles2, negTrainArticles2, 0);
 		}
-		workConfig.lv1DecisionTree.training(posTrainArticles2,
-				negTrainArticles2, 1);
 
-		int base1 = 2, base2 = 2 + workConfig.MLmachines.length;
+		int base1 = 1, base2 = 1 + workConfig.MLmachines.length;
 		ArrayList<TreeMap<Integer, Double>> votePosVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<TreeMap<Integer, Double>> voteNegVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<Article> articles = new ArrayList<Article>();
@@ -564,13 +551,6 @@ public class Main {
 				voteVec.put(0 * 2, predictW);
 			else
 				voteVec.put(0 * 2 + 1, predictW);
-
-			predict = workConfig.lv1DecisionTree.classify(article.occVec);
-			predictW = 0;
-			if (predict)
-				voteVec.put(1 * 2, predictW);
-			else
-				voteVec.put(1 * 2 + 1, predictW);
 
 			for (int j = 0; j < workConfig.MLmachines.length; j++) {
 				predict = workConfig.MLmachines[j].classify(article.vec);

@@ -19,7 +19,6 @@ public class TrainingConfig {
 	public LanguageModel LMmachine;
 	public WinnowMachine MLmachines[];
 	public PassiveAggressive PAmachines[], meetingMachine;
-	public DecisionStump lv1DecisionTree;
 
 	/**
 	 * support transfer data structure

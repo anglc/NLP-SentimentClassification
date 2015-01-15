@@ -55,6 +55,8 @@ public class ModelUtilities {
 
 	public static TreeSet<String> ignoreToken = new TreeSet<String>();
 	public static TreeSet<String> notToken = new TreeSet<String>();
+	public static TreeSet<String> posToken = new TreeSet<String>();
+	public static TreeSet<String> negToken = new TreeSet<String>();
 
 	public static boolean sieveToken(String s) {
 		if (ignoreToken.contains(s))

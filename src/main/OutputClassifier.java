@@ -9,7 +9,6 @@ import comp.MeasureInfo;
 import comp.ReturnCell;
 import model.Article;
 import model.classifier.Classifier;
-import model.classifier.DecisionStump;
 import model.classifier.LanguageModel;
 import model.classifier.PassiveAggressive;
 import model.classifier.WinnowMachine;
@@ -24,12 +23,12 @@ public class OutputClassifier {
 	}
 
 	public static MeasureInfo testMeetingInterview(
-			DecisionStump lv1DecisionTree, PassiveAggressive meetingMachine,
-			LanguageModel LMmachine, WinnowMachine[] MLmachine,
-			PassiveAggressive[] PAmachine, ArrayList<Article> posTestArticles,
+			PassiveAggressive meetingMachine, LanguageModel LMmachine,
+			WinnowMachine[] MLmachine, PassiveAggressive[] PAmachine,
+			ArrayList<Article> posTestArticles,
 			ArrayList<Article> negTestArticles) {
 		// int vectorSize = (2 + MLmachine.length + PAmachine.length) * 2;
-		int base1 = 2, base2 = 2 + MLmachine.length;
+		int base1 = 1, base2 = 1 + MLmachine.length;
 		ArrayList<TreeMap<Integer, Double>> posVec = new ArrayList<TreeMap<Integer, Double>>();
 		ArrayList<TreeMap<Integer, Double>> negVec = new ArrayList<TreeMap<Integer, Double>>();
 
@@ -48,13 +47,6 @@ public class OutputClassifier {
 				voteVec.put(0 * 2, predictW);
 			else
 				voteVec.put(0 * 2 + 1, predictW);
-
-			predict = lv1DecisionTree.classify(article.occVec);
-			predictW = 0;
-			if (predict)
-				voteVec.put(1 * 2, predictW);
-			else
-				voteVec.put(1 * 2 + 1, predictW);
 
 			for (int j = 0; j < MLmachine.length; j++) {
 				predict = MLmachine[j].classify(article.vec);
@@ -83,19 +75,6 @@ public class OutputClassifier {
 
 		return testClassifierByVec("Adaboost", meetingMachine, posVec, negVec,
 				posTestArticles, negTestArticles);
-	}
-
-	public static MeasureInfo testSimpleDecision(DecisionStump lv1DecisionTree,
-			ArrayList<Article> posTestArticles,
-			ArrayList<Article> negTestArticles) {
-		ArrayList<TreeMap<Integer, Double>> posVec = new ArrayList<TreeMap<Integer, Double>>();
-		ArrayList<TreeMap<Integer, Double>> negVec = new ArrayList<TreeMap<Integer, Double>>();
-		for (Article pos : posTestArticles)
-			posVec.add(pos.occVec);
-		for (Article neg : negTestArticles)
-			negVec.add(neg.occVec);
-		return testClassifierByVec("Simple Decision", lv1DecisionTree, posVec,
-				negVec, posTestArticles, negTestArticles);
 	}
 
 	public static MeasureInfo testClassifierByVec(String algName,

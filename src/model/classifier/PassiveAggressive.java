@@ -137,13 +137,9 @@ public class PassiveAggressive implements Classifier {
 				if (articles.get(i).polarity > 0) {
 					if (kind == 0)
 						this.add(articles.get(i).vec, 1);
-					else if (kind == 1)
-						this.add(articles.get(i).occVec, 1);
 				} else {
 					if (kind == 0)
 						this.add(articles.get(i).vec, -1);
-					else if (kind == 1)
-						this.add(articles.get(i).occVec, -1);
 				}
 			}
 		}
@@ -154,13 +150,9 @@ public class PassiveAggressive implements Classifier {
 			if (articles.get(i).polarity > 0) {
 				if (kind == 0)
 					this.selfTraining(articles.get(i).vec, 1);
-				else if (kind == 1)
-					this.selfTraining(articles.get(i).occVec, 1);
 			} else {
 				if (kind == 0)
 					this.selfTraining(articles.get(i).vec, -1);
-				else if (kind == 1)
-					this.selfTraining(articles.get(i).occVec, -1);
 			}
 		}
 	}
