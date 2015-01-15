@@ -7,7 +7,6 @@ import java.util.TreeSet;
 import model.Article;
 import model.ModelUtilities;
 import model.nGram;
-import model.classifier.DecisionStump;
 import model.classifier.LanguageModel;
 import model.classifier.PassiveAggressive;
 import model.classifier.WinnowMachine;
@@ -99,10 +98,16 @@ public class TrainingConfig {
 		this.negTrainArticles = negTrainArticles2;
 	}
 
-	public void printMixPcik(int K) {
+	/**
+	 * print K-top feature N-grams, and N-grams must exactly have N tuples.
+	 * 
+	 * @param K
+	 * @param N
+	 */
+	public void printMixPick(int K, int N) {
 		for (int i = 0, cnt = 0; cnt < K && i < mixPick.size(); i++) {
 			nGram e = mixPick.get(i);
-			if (e.getNonTerminal() == Ngram) {
+			if (e.getNonTerminal() == N) {
 				cnt++;
 				System.out.printf("Score ( ");
 				for (int j = 0; j < e.iWord.length; j++) {

@@ -13,7 +13,6 @@ import comp.ReturnCell;
 import model.Article;
 import model.DataSieve;
 import model.nGram;
-import model.classifier.DecisionStump;
 import model.classifier.LanguageModel;
 import model.classifier.PassiveAggressive;
 import model.classifier.WinnowMachine;
@@ -429,14 +428,6 @@ public class Main {
 		for (int i = 0; i < m; i++)
 			negTrainArticles.get(i).preprocess(Ngram, posPickSet, negPickSet,
 					mixPick, mixPickPosMap);
-	}
-
-	public static DecisionStump createSimpleDecision(
-			ArrayList<Article> posTrainArticles2,
-			ArrayList<Article> negTrainArticles2) {
-		DecisionStump lv1DecisionTree = new DecisionStump(5);
-		lv1DecisionTree.training(posTrainArticles2, negTrainArticles2, 1);
-		return lv1DecisionTree;
 	}
 
 	public static PassiveAggressive createMeeting(LanguageModel LMmachine,

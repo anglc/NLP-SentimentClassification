@@ -3,7 +3,6 @@ package model;
 import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 import comp.ReturnCell;
 
@@ -32,8 +31,9 @@ public class Article {
 
 		vec = ModelUtilities.getCharacteristicWeightVector(content, Ngram,
 				mixPickPosMap, sentCount, tokenCount);
+
 		occGramVec = ModelUtilities.getNgramOcc(content, Ngram, mixPickPosMap);
-		
+
 		this.sentCount = sentCount.get();
 		this.tokenCount = tokenCount.get();
 	}

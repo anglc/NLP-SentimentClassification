@@ -53,22 +53,22 @@ public class Loader {
 		stopWordsFile = new File(trainingPath + "/extra/stopwords.txt");
 		stopWords = new TreeSet<String>();
 		storeWords(stopWordsFile, stopWords);
-		ModelUtilities.ignoreToken = stopWords;
+		ModelUtilities.ignoreTokens = stopWords;
 
 		notWordsFile = new File(trainingPath + "/extra/negation_not.txt");
 		notWords = new TreeSet<String>();
 		storeWords(notWordsFile, notWords);
-		ModelUtilities.notToken = notWords;
+		ModelUtilities.notTokens = notWords;
 
 		posWordsFile = new File(trainingPath + "/extra/pos_word.txt");
 		posWords = new TreeSet<String>();
 		storeWords(posWordsFile, posWords);
-		ModelUtilities.posToken = posWords;
+		ModelUtilities.posTokens = posWords;
 		
 		negWordsFile = new File(trainingPath + "/extra/neg_word.txt");
 		negWords = new TreeSet<String>();
 		storeWords(negWordsFile, negWords);
-		ModelUtilities.negToken = negWords;
+		ModelUtilities.negTokens = negWords;
 	}
 
 

@@ -53,13 +53,13 @@ public class ModelUtilities {
 		return s;
 	}
 
-	public static TreeSet<String> ignoreToken = new TreeSet<String>();
-	public static TreeSet<String> notToken = new TreeSet<String>();
-	public static TreeSet<String> posToken = new TreeSet<String>();
-	public static TreeSet<String> negToken = new TreeSet<String>();
+	public static TreeSet<String> ignoreTokens = new TreeSet<String>();
+	public static TreeSet<String> notTokens = new TreeSet<String>();
+	public static TreeSet<String> posTokens = new TreeSet<String>();
+	public static TreeSet<String> negTokens = new TreeSet<String>();
 
 	public static boolean sieveToken(String s) {
-		if (ignoreToken.contains(s))
+		if (ignoreTokens.contains(s))
 			return false;
 		return true;
 	}
@@ -87,7 +87,7 @@ public class ModelUtilities {
 			return "movie";
 		// if (s.equals("no") || s.equals("never") || s.equals("but")||
 		// s.equals("neither"))
-		if (notToken.contains(s))
+		if (notTokens.contains(s))
 			return "not";
 		if (s.equals("u"))
 			return "you";
@@ -120,6 +120,23 @@ public class ModelUtilities {
 				nGram e = new nGram(a);
 				// e.dag();
 				ret.add(e);
+			}
+		}
+		return ret;
+	}
+
+	public static ArrayList<String> transformTokens(String s) {
+		ArrayList<String> ret = new ArrayList<String>();
+		String[] stmt = s.split("\\.|,|:|;|\\?|!|\\*");
+		for (String ss : stmt) {
+			ss = sieveString(ss);
+			StringTokenizer st = new StringTokenizer(ss);
+			while (st.hasMoreTokens()) {
+				String token = st.nextToken();
+				token = token.toLowerCase();
+				token = replaceSynonym(token);
+				if (sieveToken(token) && token.length() > 0)
+					ret.add(token);
 			}
 		}
 		return ret;
@@ -180,8 +197,11 @@ public class ModelUtilities {
 			String s, int n, TreeMap<nGram, Integer> mixPickPosMap,
 			ReturnCell<Integer> sentCount, ReturnCell<Integer> tokenCount) {
 		ArrayList<nGram> t = transformNgram(s, n, sentCount, tokenCount);
+		ArrayList<String> tokens = transformTokens(s);
 		TreeMap<nGram, Integer> tMap = new TreeMap<nGram, Integer>();
 		TreeMap<nGram, Integer> tCountMap = new TreeMap<nGram, Integer>();
+		TreeMap<Integer, Double> vec = new TreeMap<Integer, Double>();
+		int pos = 0, neg = 0;
 		for (nGram e : t) {
 			int count = scoreNgram(e);
 			tMap.put(e, count);
@@ -190,17 +210,26 @@ public class ModelUtilities {
 				count = tCountMap.get(e) + 1;
 			tCountMap.put(e, count);
 		}
-		TreeMap<Integer, Double> ret = new TreeMap<Integer, Double>();
+
 		for (Map.Entry<nGram, Integer> e : tMap.entrySet()) {
 			if (mixPickPosMap.containsKey(e.getKey())) {
 				double v = e.getValue();
-				ret.put(mixPickPosMap.get(e.getKey()),
+				vec.put(mixPickPosMap.get(e.getKey()),
 						v + Math.sqrt(tCountMap.get(e.getKey())));
-			} else {
-
 			}
 		}
-		return ret;
+
+		for (String token : tokens) {
+			if (posTokens.contains(token))
+				pos++;
+			if (negTokens.contains(token))
+				neg++;
+		}
+
+		vec.put(mixPickPosMap.get(nGram.POS), (double) pos);
+		vec.put(mixPickPosMap.get(nGram.NEG), (double) neg);
+
+		return vec;
 	}
 
 	public static String getWordName(int id) {
