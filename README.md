@@ -54,6 +54,16 @@ Processing Options
 	-n <NGRAM_MAX>			n-grams size. default <NGRAM_MAX>="3".
 
 	-top <FEATURE_MAX>		pick the number of feature n-grams. default <FEATURE_MAX>="40000".
+
+	-cross <CROSS_TIMES>	default <CROSS_TIMES>="5".
+
+	-crosspart <RATIO>		pick <RATIO> : 5 = TRAINING : OTHER, default <RATIO>="5".
+
+	-ittime <ITCOUNT> 		training model, default <ITCOUNT>="20"
+
+	-oittime <ITCOUNT>		online training model, default <ITCOUNT>="20"
+
+	-ui 					call UI interface.
 ```
 
 ## Sample ##
