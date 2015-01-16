@@ -121,7 +121,6 @@ public class TrainingConfig {
 	}
 
 	public void start() {
-		hasUI = true;
 		if (hasUI) {
 			Dashboard demo = new Dashboard();
 		} else {

@@ -183,16 +183,19 @@ public class Dashboard extends JFrame {
 				final String testPath = consoleField.getText();
 				final int ITLIMIT = (Integer) ITSpinner.getValue();
 				final int OITLIMIT = (Integer) oITSpinner.getValue();
+				final int cross = (Integer) crossSpinner.getValue();
 				final int crosspart = (Integer) cpartSpinner.getValue();
 
 				String[] args = { "-n", String.valueOf(Ngram), "-top",
 						String.valueOf(topNgram), "-path", trainingPath,
 						"-tpath", testPath, "-ittime", String.valueOf(ITLIMIT),
 						"-oittime", String.valueOf(OITLIMIT), "-crosspart",
-						String.valueOf(crosspart) };
-				
+						String.valueOf(crosspart), "-cross",
+						String.valueOf(cross) };
+
 				TrainingConfig config = new TrainingConfig(args);
 				Main.workConfig = config;
+
 				new Thread("NLP-SC-Trainer") {
 					public void run() {
 						try {
@@ -210,6 +213,7 @@ public class Dashboard extends JFrame {
 							System.out.println("\n## Ready for testing ##");
 							System.out.println();
 						} catch (Exception ex) {
+							ex.printStackTrace();
 						} finally {
 							trainingButton.setText("Training");
 							trainingButton.setEnabled(true);

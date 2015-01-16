@@ -12,6 +12,11 @@ public class ClockTextLabel extends JLabel {
 
 	public ClockTextLabel() {
 		super("00 : 00");
+	}
+
+	public void start() {
+		this.startTime = System.currentTimeMillis();
+		this.timer = new Timer();
 		this.clockTask = new TimerTask() {
 
 			@Override
@@ -26,15 +31,10 @@ public class ClockTextLabel extends JLabel {
 			}
 
 		};
-	}
-
-	public void start() {
-		this.startTime = System.currentTimeMillis();
-		this.timer = new Timer();
 		this.timer.schedule(clockTask, 0, 1000);
 	}
 
 	public void stop() {
-		timer.cancel();
+		this.timer.cancel();
 	}
 }
